@@ -81,11 +81,21 @@ export default function Globe() {
     scene.add(globe)
 
     // Add lights
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5)
+    const ambientLight = new THREE.AmbientLight(0xffffff, 2.5)
     scene.add(ambientLight)
-    const pointLight = new THREE.PointLight(0xffffff, 1)
+    const pointLight = new THREE.PointLight(0xffffff, 3)
     pointLight.position.set(10, 10, 10)
     scene.add(pointLight)
+    
+    // Add another light from the opposite side
+    const pointLight2 = new THREE.PointLight(0xffffff, 2.5)
+    pointLight2.position.set(-10, -10, 10)
+    scene.add(pointLight2)
+    
+    // Add a third light from the front
+    const pointLight3 = new THREE.PointLight(0xffffff, 2)
+    pointLight3.position.set(0, 0, 15)
+    scene.add(pointLight3)
 
     // Camera position
     camera.position.z = 15

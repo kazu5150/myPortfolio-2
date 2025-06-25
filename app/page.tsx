@@ -2,15 +2,83 @@
 
 import dynamic from "next/dynamic"
 import { Suspense } from "react"
+import Link from "next/link"
+import { Github, Linkedin, Mail, ChevronDown } from "lucide-react"
 
 const Globe = dynamic(() => import("@/components/Globe"), { ssr: false })
 
 export default function Home() {
   return (
-    <main className="relative min-h-screen bg-black overflow-hidden">
-      <Suspense fallback={<div>Loading...</div>}>
-        <Globe />
-      </Suspense>
-    </main>
+    <div className="relative min-h-screen overflow-hidden flex items-center">
+      {/* Background Globe - centered */}
+      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] opacity-60 lg:opacity-70">
+        <Suspense fallback={<div />}>
+          <Globe />
+        </Suspense>
+      </div>
+
+      {/* Main Content - positioned to the left */}
+      <div className="relative z-10 w-full max-w-7xl mx-auto px-6 lg:px-16 py-16">
+        <div className="space-y-8 max-w-3xl">
+          {/* Hero Text */}
+          <h1 className="text-4xl md:text-5xl lg:text-7xl font-thin leading-tight tracking-tight">
+            <span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+              Matsuzawa
+            </span>
+            <span className="text-white">, the AI</span>
+            <br />
+            <span className="text-white">software engineer</span>
+          </h1>
+
+          {/* Japanese Subtitle */}
+          <p className="text-lg md:text-xl text-gray-400 max-w-2xl font-light">
+            副業から本業へ転身する開発者の成長記録。
+            <br />
+            AIとテクノロジーで未来を築く。
+          </p>
+
+          {/* CTA Button */}
+          <div className="pt-8">
+            <Link
+              href="/learning"
+              className="inline-flex items-center px-6 md:px-8 py-3 md:py-4 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-full text-base md:text-lg font-medium hover:from-cyan-600 hover:to-blue-700 transition-all duration-200 shadow-lg shadow-cyan-500/25"
+            >
+              Start exploring
+            </Link>
+          </div>
+        </div>
+
+        {/* Social Links */}
+        <div className="fixed lg:absolute bottom-8 lg:bottom-16 left-6 lg:left-16 flex items-center gap-4 lg:gap-6 z-20">
+          <Link
+            href="https://github.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-10 h-10 lg:w-12 lg:h-12 border border-gray-700 rounded-lg flex items-center justify-center text-gray-400 hover:text-white hover:border-gray-500 transition-colors"
+          >
+            <Github className="h-5 w-5" />
+          </Link>
+          <Link
+            href="https://linkedin.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-10 h-10 lg:w-12 lg:h-12 border border-gray-700 rounded-lg flex items-center justify-center text-gray-400 hover:text-white hover:border-gray-500 transition-colors"
+          >
+            <Linkedin className="h-5 w-5" />
+          </Link>
+          <Link
+            href="mailto:contact@example.com"
+            className="w-10 h-10 lg:w-12 lg:h-12 border border-gray-700 rounded-lg flex items-center justify-center text-gray-400 hover:text-white hover:border-gray-500 transition-colors"
+          >
+            <Mail className="h-5 w-5" />
+          </Link>
+        </div>
+
+        {/* Scroll Indicator */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 text-gray-500 animate-bounce">
+          <ChevronDown className="h-6 w-6" />
+        </div>
+      </div>
+    </div>
   )
 }
