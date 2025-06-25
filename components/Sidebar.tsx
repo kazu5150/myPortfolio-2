@@ -61,6 +61,9 @@ export default function Sidebar({ onCollapsedChange }: { onCollapsedChange?: (co
   useEffect(() => {
     localStorage.setItem('sidebarCollapsed', JSON.stringify(isCollapsed))
     onCollapsedChange?.(isCollapsed)
+    
+    // Emit custom event for other components to listen
+    window.dispatchEvent(new CustomEvent('sidebarCollapsed', { detail: isCollapsed }))
   }, [isCollapsed, onCollapsedChange])
 
   return (

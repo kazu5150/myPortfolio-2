@@ -4,11 +4,15 @@ import dynamic from "next/dynamic"
 import { Suspense } from "react"
 import Link from "next/link"
 import { Github, Linkedin, Mail, ChevronDown } from "lucide-react"
+import { cn } from "@/lib/utils"
+import { useSidebarState } from "@/hooks/useSidebarState"
 
 const Globe = dynamic(() => import("@/components/Globe"), { ssr: false })
 const AboutMe = dynamic(() => import("@/components/AboutMe"), { ssr: false })
 
 export default function Home() {
+  const isCollapsed = useSidebarState()
+
   return (
     <div className="relative">
       {/* Hero Section */}
@@ -52,7 +56,11 @@ export default function Home() {
         </div>
 
         {/* Social Links */}
-        <div className="fixed lg:absolute bottom-8 lg:bottom-16 left-6 lg:left-16 flex items-center gap-4 lg:gap-6 z-20">
+        <div className={cn(
+          "fixed bottom-8 flex items-center gap-4 lg:gap-6 z-20 transition-all duration-300",
+          "left-6",
+          isCollapsed ? "lg:left-24" : "lg:left-[304px]"
+        )}>
           <Link
             href="https://github.com"
             target="_blank"
