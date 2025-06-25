@@ -2,9 +2,9 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Home, GraduationCap, Beaker, BookOpen, LayoutDashboard, Mail, Code2, Menu, X } from "lucide-react"
+import { Home, GraduationCap, Beaker, BookOpen, LayoutDashboard, Mail, Code2, Menu, X, ChevronLeft, ChevronRight } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 
 const navigation = [
   {
@@ -45,9 +45,23 @@ const navigation = [
   },
 ]
 
-export default function Sidebar() {
+export default function Sidebar({ onCollapsedChange }: { onCollapsedChange?: (collapsed: boolean) => void }) {
   const pathname = usePathname()
   const [isOpen, setIsOpen] = useState(false)
+  const [isCollapsed, setIsCollapsed] = useState(false)
+
+  // Save collapsed state to localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem('sidebarCollapsed')
+    if (saved !== null) {
+      setIsCollapsed(JSON.parse(saved))
+    }
+  }, [])
+
+  useEffect(() => {
+    localStorage.setItem('sidebarCollapsed', JSON.stringify(isCollapsed))
+    onCollapsedChange?.(isCollapsed)
+  }, [isCollapsed, onCollapsedChange])
 
   return (
     <>
@@ -69,14 +83,23 @@ export default function Sidebar() {
 
       {/* Sidebar */}
       <aside className={cn(
-        "fixed left-0 top-0 h-full w-[280px] bg-[#0a0a0a] border-r border-gray-800 flex flex-col z-40 transition-transform duration-300",
+        "fixed left-0 top-0 h-full bg-[#0a0a0a] border-r border-gray-800 flex flex-col z-40 transition-all duration-300",
+        isCollapsed ? "w-[80px]" : "w-[280px]",
         isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
       )}>
+      {/* Desktop Toggle Button */}
+      <button
+        onClick={() => setIsCollapsed(!isCollapsed)}
+        className="hidden lg:flex absolute -right-3 top-6 w-6 h-6 bg-gray-800 rounded-full items-center justify-center text-gray-400 hover:text-white border border-gray-700 hover:border-gray-600 transition-colors"
+      >
+        {isCollapsed ? <ChevronRight className="h-3 w-3" /> : <ChevronLeft className="h-3 w-3" />}
+      </button>
+
       {/* Logo */}
       <div className="p-6">
         <Link href="/" className="flex items-center gap-2 text-cyan-400">
           <Code2 className="h-6 w-6" />
-          <span className="text-xl font-semibold">AI Portfolio</span>
+          {!isCollapsed && <span className="text-xl font-semibold">AI Portfolio</span>}
         </Link>
       </div>
 
@@ -94,16 +117,20 @@ export default function Sidebar() {
                     "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors",
                     isActive
                       ? "bg-cyan-400/10 text-cyan-400"
-                      : "text-gray-400 hover:text-gray-100 hover:bg-gray-800/50"
+                      : "text-gray-400 hover:text-gray-100 hover:bg-gray-800/50",
+                    isCollapsed && "justify-center"
                   )}
+                  title={isCollapsed ? item.name : undefined}
                 >
-                  <item.icon className="h-5 w-5" />
-                  <div className="flex-1">
-                    <div className="font-medium">{item.name}</div>
-                    {item.description && (
-                      <div className="text-xs text-gray-500">{item.description}</div>
-                    )}
-                  </div>
+                  <item.icon className={cn("h-5 w-5", isCollapsed && "h-6 w-6")} />
+                  {!isCollapsed && (
+                    <div className="flex-1">
+                      <div className="font-medium">{item.name}</div>
+                      {item.description && (
+                        <div className="text-xs text-gray-500">{item.description}</div>
+                      )}
+                    </div>
+                  )}
                 </Link>
               </li>
             )
@@ -112,12 +139,12 @@ export default function Sidebar() {
       </nav>
 
       {/* Footer */}
-      <div className="p-6 text-xs text-gray-500 space-y-2">
+      <div className={cn("p-6 text-xs text-gray-500 space-y-2", isCollapsed && "p-4")}>
         <div className="flex items-center gap-1">
           <Code2 className="h-3 w-3" />
-          <span>Powered by AI</span>
+          {!isCollapsed && <span>Powered by AI</span>}
         </div>
-        <div>© 2024 Kazu Dev</div>
+        {!isCollapsed && <div>© 2024 Kazu Dev</div>}
       </div>
     </aside>
     </>
