@@ -6,10 +6,13 @@ import Link from "next/link"
 import { Github, Linkedin, Mail, ChevronDown } from "lucide-react"
 
 const Globe = dynamic(() => import("@/components/Globe"), { ssr: false })
+const AboutMe = dynamic(() => import("@/components/AboutMe"), { ssr: false })
 
 export default function Home() {
   return (
-    <div className="relative min-h-screen overflow-hidden flex items-center">
+    <div className="relative">
+      {/* Hero Section */}
+      <div className="relative min-h-screen overflow-hidden flex items-center">
       {/* Background Globe - centered */}
       <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] opacity-60 lg:opacity-70">
         <Suspense fallback={<div />}>
@@ -79,6 +82,10 @@ export default function Home() {
           <ChevronDown className="h-6 w-6" />
         </div>
       </div>
+      </div>
+
+      {/* About Me Section */}
+      <AboutMe />
     </div>
   )
 }
