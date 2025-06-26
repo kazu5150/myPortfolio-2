@@ -4,7 +4,11 @@ import { useEffect, useRef } from "react"
 import * as THREE from "three"
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls"
 
-export default function Globe() {
+interface GlobeProps {
+  onColorChange?: (color: { from: string; to: string }) => void
+}
+
+export default function Globe({ onColorChange }: GlobeProps) {
   const mountRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -118,7 +122,12 @@ export default function Globe() {
     let colorIndex = 0
     let nextColorIndex = 1
     let colorT = 0
-    const colorTransitionSpeed = 0.01
+    const colorTransitionSpeed = 0.003 // 少し速度を上げて滑らかに
+
+    // Helper function to convert THREE.Color to hex string
+    const colorToHex = (color: THREE.Color) => {
+      return "#" + color.getHexString()
+    }
 
     // Animation loop
     function animate() {
@@ -140,6 +149,22 @@ export default function Globe() {
       globeMaterial.color = currentColor
       if (atmosphereMaterial.uniforms.glowColor) {
         atmosphereMaterial.uniforms.glowColor.value = currentColor
+      }
+
+      // Call the color change callback with gradient colors
+      if (onColorChange) {
+        // Create a smooth gradient transition
+        const fromColor = new THREE.Color()
+        const toColor = new THREE.Color()
+        
+        // Use smooth interpolation for gradient edges
+        fromColor.lerpColors(colors[colorIndex], colors[nextColorIndex], colorT * 0.7)
+        toColor.lerpColors(colors[colorIndex], colors[nextColorIndex], Math.min(1, colorT + 0.3))
+        
+        onColorChange({
+          from: colorToHex(fromColor),
+          to: colorToHex(toColor)
+        })
       }
 
       // Rotate objects
@@ -173,7 +198,7 @@ export default function Globe() {
       controls.dispose()
       renderer.dispose()
     }
-  }, [])
+  }, [onColorChange])
 
   return (
     <>

@@ -1,17 +1,55 @@
 "use client"
 
 import dynamic from "next/dynamic"
-import { Suspense } from "react"
+import { Suspense, useState, useEffect } from "react"
 import Link from "next/link"
 import { Github, Linkedin, Mail, ChevronDown } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useSidebarState } from "@/hooks/useSidebarState"
 
-const Globe = dynamic(() => import("@/components/Globe"), { ssr: false })
+const Globe = dynamic<{ onColorChange?: (color: { from: string; to: string }) => void }>(
+  () => import("@/components/Globe"), 
+  { ssr: false }
+)
 const AboutMe = dynamic(() => import("@/components/AboutMe"), { ssr: false })
 
 export default function Home() {
   const isCollapsed = useSidebarState()
+  const [currentColor, setCurrentColor] = useState({ from: "#06b6d4", to: "#3b82f6" }) // cyan-400 to blue-500
+  const [targetColor, setTargetColor] = useState({ from: "#06b6d4", to: "#3b82f6" })
+  
+  // Smooth color transition using useEffect
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentColor(prev => {
+        const lerpColor = (start: string, end: string, t: number) => {
+          const startRGB = parseInt(start.slice(1), 16)
+          const endRGB = parseInt(end.slice(1), 16)
+          
+          const r1 = (startRGB >> 16) & 0xff
+          const g1 = (startRGB >> 8) & 0xff
+          const b1 = startRGB & 0xff
+          
+          const r2 = (endRGB >> 16) & 0xff
+          const g2 = (endRGB >> 8) & 0xff
+          const b2 = endRGB & 0xff
+          
+          const r = Math.round(r1 + (r2 - r1) * t)
+          const g = Math.round(g1 + (g2 - g1) * t)
+          const b = Math.round(b1 + (b2 - b1) * t)
+          
+          return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`
+        }
+        
+        const newFrom = lerpColor(prev.from, targetColor.from, 0.05)
+        const newTo = lerpColor(prev.to, targetColor.to, 0.05)
+        
+        return { from: newFrom, to: newTo }
+      })
+    }, 16) // 60fps
+    
+    return () => clearInterval(interval)
+  }, [targetColor])
 
   return (
     <div className="relative">
@@ -20,7 +58,7 @@ export default function Home() {
       {/* Background Globe - centered */}
       <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] opacity-60 lg:opacity-70">
         <Suspense fallback={<div />}>
-          <Globe />
+          <Globe onColorChange={setTargetColor} />
         </Suspense>
       </div>
 
@@ -29,7 +67,14 @@ export default function Home() {
         <div className="space-y-8 max-w-3xl">
           {/* Hero Text */}
           <h1 className="text-4xl md:text-5xl lg:text-7xl font-thin leading-tight tracking-tight">
-            <span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+            <span 
+              className="bg-gradient-to-r bg-clip-text text-transparent transition-all duration-1000 inline-block"
+              style={{
+                backgroundImage: `linear-gradient(90deg, ${currentColor.from} 0%, ${currentColor.to} 50%, ${currentColor.from} 100%)`,
+                backgroundSize: '200% 100%',
+                backgroundPosition: '0% 50%'
+              }}
+            >
               Matsuzawa
             </span>
             <span className="text-white">, the AI</span>
