@@ -1,62 +1,14 @@
 "use client"
 
 import { useState } from "react"
-import { Plus, Code2, ExternalLink, Trash2, Github as GithubIcon } from "lucide-react"
+import { Plus, Code2, ExternalLink, Trash2, Github as GithubIcon, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
-
-// Project types
-type ProjectCategory = "ALL" | "WEB" | "MOBILE" | "AI" | "GAME" | "TOOL" | "OTHER"
-type ProjectStatus = "ALL" | "PLANNING" | "IN_PROGRESS" | "TESTING" | "COMPLETED" | "PAUSED"
-
-interface Project {
-  id: string
-  title: string
-  description: string
-  category: ProjectCategory
-  status: ProjectStatus
-  progress: number
-  technologies: string[]
-  startDate: string
-  updateDate: string
-  links: {
-    demo?: string
-    github?: string
-  }
-}
-
-// Mock data
-const mockProjects: Project[] = [
-  {
-    id: "1",
-    title: "WMS 倉庫管理システム",
-    description: "WMS作ってみた",
-    category: "WEB",
-    status: "IN_PROGRESS",
-    progress: 40,
-    technologies: ["Next.js", "supabase", "Vercel"],
-    startDate: "2025/6/14",
-    updateDate: "2025/6/23",
-    links: {
-      demo: "#",
-      github: "#"
-    }
-  },
-  {
-    id: "2",
-    title: "Eleven Labs 音声チャットボット",
-    description: "Eleven Labs & OpenAI APIによるウェブアプリの作成公開",
-    category: "AI",
-    status: "COMPLETED",
-    progress: 0,
-    technologies: ["Next.js", "OpenAI API", "Eleven Labs API", "Vercel"],
-    startDate: "2025/6/19",
-    updateDate: "2025/6/22",
-    links: {
-      demo: "#",
-      github: "#"
-    }
-  }
-]
+import { useProjects } from "@/hooks/useProjects"
+import { ProjectCategory, ProjectStatus } from "@/types/database"
+import { ProjectForm } from "@/components/ProjectForm"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
+import { toast } from "sonner"
 
 const categoryFilters: { value: ProjectCategory; label: string }[] = [
   { value: "ALL", label: "すべて" },
@@ -78,21 +30,61 @@ const statusFilters: { value: ProjectStatus; label: string }[] = [
 ]
 
 export default function ExperimentsPage() {
-  const [categoryFilter, setCategoryFilter] = useState<ProjectCategory>("ALL")
-  const [statusFilter, setStatusFilter] = useState<ProjectStatus>("ALL")
+  const [categoryFilter, setCategoryFilter] = useState<ProjectCategory | "ALL">("ALL")
+  const [statusFilter, setStatusFilter] = useState<ProjectStatus | "ALL">("ALL")
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
+  const { projects, loading, error, deleteProject } = useProjects()
 
-  const filteredProjects = mockProjects.filter(project => {
+  const filteredProjects = projects.filter(project => {
     const categoryMatch = categoryFilter === "ALL" || project.category === categoryFilter
     const statusMatch = statusFilter === "ALL" || project.status === statusFilter
     return categoryMatch && statusMatch
   })
 
-  const getStatusLabel = (status: ProjectStatus) => {
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteProject(id)
+      toast.success("プロジェクトを削除しました")
+    } catch {
+      toast.error("プロジェクトの削除に失敗しました")
+    }
+  }
+
+  const getStatusLabel = (status: string) => {
     switch (status) {
+      case "PLANNING": return "計画中"
       case "IN_PROGRESS": return "開発中"
+      case "TESTING": return "テスト中"
       case "COMPLETED": return "完成"
+      case "PAUSED": return "一時停止"
       default: return status
     }
+  }
+
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return "未設定"
+    return new Date(dateString).toLocaleDateString('ja-JP')
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen p-6 lg:p-12 flex items-center justify-center">
+        <div className="flex items-center gap-2 text-cyan-400">
+          <Loader2 className="h-6 w-6 animate-spin" />
+          <span>プロジェクトを読み込み中...</span>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen p-6 lg:p-12 flex items-center justify-center">
+        <div className="text-red-400 text-center">
+          <p>エラーが発生しました: {error}</p>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -110,10 +102,20 @@ export default function ExperimentsPage() {
         <div className="space-y-6 mb-12">
           <div className="flex items-center gap-6">
             <h2 className="text-xl text-cyan-400">プロジェクト一覧</h2>
-            <button className="ml-auto px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2">
-              <Plus className="h-5 w-5" />
-              新規プロジェクト
-            </button>
+            <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+              <DialogTrigger asChild>
+                <Button className="ml-auto bg-blue-600 hover:bg-blue-700">
+                  <Plus className="h-5 w-5 mr-2" />
+                  新規プロジェクト
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>新規プロジェクト作成</DialogTitle>
+                </DialogHeader>
+                <ProjectForm onClose={() => setIsCreateDialogOpen(false)} />
+              </DialogContent>
+            </Dialog>
           </div>
 
           {/* Category Filters */}
@@ -123,7 +125,7 @@ export default function ExperimentsPage() {
               {categoryFilters.map(filter => (
                 <button
                   key={filter.value}
-                  onClick={() => setCategoryFilter(filter.value)}
+                  onClick={() => setCategoryFilter(filter.value as ProjectCategory | "ALL")}
                   className={cn(
                     "px-4 py-2 rounded-lg text-sm transition-colors",
                     categoryFilter === filter.value
@@ -144,7 +146,7 @@ export default function ExperimentsPage() {
               {statusFilters.map(filter => (
                 <button
                   key={filter.value}
-                  onClick={() => setStatusFilter(filter.value)}
+                  onClick={() => setStatusFilter(filter.value as ProjectStatus | "ALL")}
                   className={cn(
                     "px-4 py-2 rounded-lg text-sm transition-colors",
                     statusFilter === filter.value
@@ -204,24 +206,41 @@ export default function ExperimentsPage() {
 
               {/* Dates */}
               <div className="flex gap-4 text-sm text-gray-500 mb-4">
-                <span>📅 開始: {project.startDate}</span>
-                <span>🔄 更新: {project.updateDate}</span>
+                <span>📅 開始: {formatDate(project.start_date)}</span>
+                <span>🔄 更新: {formatDate(project.update_date)}</span>
               </div>
 
               {/* Actions */}
               <div className="flex gap-2">
-                <button className="px-4 py-2 bg-purple-600/20 text-purple-400 rounded-lg hover:bg-purple-600/30 transition-colors flex items-center gap-2">
-                  <GithubIcon className="h-4 w-4" />
-                  コード
-                </button>
-                <button className="px-4 py-2 bg-gray-800 text-gray-300 rounded-lg hover:bg-gray-700 transition-colors flex items-center gap-2">
-                  <ExternalLink className="h-4 w-4" />
-                  デモ
-                </button>
+                {project.github_url && project.github_url !== "#" && (
+                  <a 
+                    href={project.github_url} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="px-4 py-2 bg-purple-600/20 text-purple-400 rounded-lg hover:bg-purple-600/30 transition-colors flex items-center gap-2"
+                  >
+                    <GithubIcon className="h-4 w-4" />
+                    コード
+                  </a>
+                )}
+                {project.demo_url && project.demo_url !== "#" && (
+                  <a 
+                    href={project.demo_url} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="px-4 py-2 bg-gray-800 text-gray-300 rounded-lg hover:bg-gray-700 transition-colors flex items-center gap-2"
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                    デモ
+                  </a>
+                )}
                 <button className="px-4 py-2 bg-cyan-600/20 text-cyan-400 rounded-lg hover:bg-cyan-600/30 transition-colors">
                   詳細を見る
                 </button>
-                <button className="ml-auto p-2 text-gray-500 hover:text-gray-300 transition-colors">
+                <button 
+                  onClick={() => handleDelete(project.id)}
+                  className="ml-auto p-2 text-gray-500 hover:text-red-400 transition-colors"
+                >
                   <Trash2 className="h-4 w-4" />
                 </button>
               </div>
