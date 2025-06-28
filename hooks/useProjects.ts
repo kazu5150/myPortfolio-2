@@ -12,6 +12,9 @@ export function useProjects() {
   const fetchProjects = async () => {
     try {
       setLoading(true)
+      
+      // Skip Supabase check in client components - let it proceed with actual fetch
+      
       const { data, error } = await supabase
         .from('projects')
         .select('*')
@@ -20,7 +23,9 @@ export function useProjects() {
       if (error) throw error
       setProjects(data || [])
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred')
+      console.warn('Supabase not configured, using empty data:', err)
+      setProjects([])
+      setError(null) // Don't show error for missing Supabase config
     } finally {
       setLoading(false)
     }

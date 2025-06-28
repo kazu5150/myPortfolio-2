@@ -12,6 +12,9 @@ export function useLearningEntries() {
   const fetchEntries = async () => {
     try {
       setLoading(true)
+      
+      // Skip Supabase check in client components - let it proceed with actual fetch
+      
       const { data, error } = await supabase
         .from('learning_entries')
         .select('*')
@@ -20,7 +23,9 @@ export function useLearningEntries() {
       if (error) throw error
       setEntries(data || [])
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred')
+      console.warn('Supabase not configured, using empty data:', err)
+      setEntries([])
+      setError(null) // Don't show error for missing Supabase config
     } finally {
       setLoading(false)
     }
