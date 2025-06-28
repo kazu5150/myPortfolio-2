@@ -109,11 +109,13 @@ export default function ExperimentsPage() {
                   新規プロジェクト
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-2xl">
+              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>新規プロジェクト作成</DialogTitle>
                 </DialogHeader>
-                <ProjectForm onClose={() => setIsCreateDialogOpen(false)} />
+                <div className="mt-4">
+                  <ProjectForm onClose={() => setIsCreateDialogOpen(false)} />
+                </div>
               </DialogContent>
             </Dialog>
           </div>
@@ -162,7 +164,7 @@ export default function ExperimentsPage() {
         </div>
 
         {/* Projects Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {filteredProjects.map(project => (
             <div key={project.id} className="bg-gray-900 border border-gray-800 rounded-lg p-6 hover:border-gray-700 transition-colors">
               <div className="flex items-start justify-between mb-4">

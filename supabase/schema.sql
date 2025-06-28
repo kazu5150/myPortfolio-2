@@ -31,7 +31,7 @@ CREATE TABLE learning_entries (
   difficulty_level TEXT DEFAULT 'BEGINNER',
   estimated_hours INTEGER,
   completed_hours INTEGER DEFAULT 0,
-  start_date DATE,
+  start_date DATE NOT NULL DEFAULT CURRENT_DATE,
   target_completion_date DATE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()

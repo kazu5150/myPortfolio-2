@@ -127,11 +127,13 @@ export default function LearningPage() {
                   新規学習項目
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-2xl">
+              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>新規学習項目作成</DialogTitle>
                 </DialogHeader>
-                <LearningForm onClose={() => setIsCreateDialogOpen(false)} />
+                <div className="mt-4">
+                  <LearningForm onClose={() => setIsCreateDialogOpen(false)} />
+                </div>
               </DialogContent>
             </Dialog>
           </div>
@@ -180,7 +182,7 @@ export default function LearningPage() {
         </div>
 
         {/* Learning Entries Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {filteredEntries.map(entry => (
             <div key={entry.id} className="bg-gray-900 border border-gray-800 rounded-lg p-6 hover:border-gray-700 transition-colors">
               <div className="flex items-start justify-between mb-4">
@@ -227,26 +229,9 @@ export default function LearningPage() {
                 ))}
               </div>
 
-              {/* Time Info */}
-              {(entry.estimated_hours || entry.completed_hours) && (
-                <div className="flex items-center gap-4 text-sm text-gray-500 mb-4">
-                  <div className="flex items-center gap-1">
-                    <Clock className="h-4 w-4" />
-                    <span>予定: {entry.estimated_hours || 0}h</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Trophy className="h-4 w-4" />
-                    <span>完了: {entry.completed_hours}h</span>
-                  </div>
-                </div>
-              )}
-
-              {/* Dates */}
-              <div className="flex gap-4 text-sm text-gray-500 mb-4">
-                <span>📅 開始: {formatDate(entry.start_date)}</span>
-                {entry.target_completion_date && (
-                  <span>🎯 目標: {formatDate(entry.target_completion_date)}</span>
-                )}
+              {/* Date */}
+              <div className="text-sm text-gray-500 mb-4">
+                <span>📅 学習日: {formatDate(entry.start_date)}</span>
               </div>
 
               {/* Actions */}

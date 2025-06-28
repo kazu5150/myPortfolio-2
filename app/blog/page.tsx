@@ -120,7 +120,9 @@ export default function BlogPage() {
                 <DialogHeader>
                   <DialogTitle>新規記事作成</DialogTitle>
                 </DialogHeader>
-                <PostForm onClose={() => setIsCreateDialogOpen(false)} />
+                <div className="mt-4">
+                  <PostForm onClose={() => setIsCreateDialogOpen(false)} />
+                </div>
               </DialogContent>
             </Dialog>
           </div>
@@ -223,10 +225,12 @@ export default function BlogPage() {
                     <DialogHeader>
                       <DialogTitle>記事編集</DialogTitle>
                     </DialogHeader>
-                    <PostForm 
-                      post={editingPost} 
-                      onClose={() => setEditingPost(null)} 
-                    />
+                    <div className="mt-4">
+                      <PostForm 
+                        post={editingPost} 
+                        onClose={() => setEditingPost(null)} 
+                      />
+                    </div>
                   </DialogContent>
                 </Dialog>
                 
