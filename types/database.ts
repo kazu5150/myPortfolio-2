@@ -62,6 +62,7 @@ export type Database = {
           title: string
           description: string | null
           category: string
+          categories: string[]
           status: string
           progress: number
           skills: string[]
@@ -79,6 +80,7 @@ export type Database = {
           title: string
           description?: string | null
           category?: string
+          categories?: string[]
           status?: string
           progress?: number
           skills?: string[]
@@ -96,6 +98,7 @@ export type Database = {
           title?: string
           description?: string | null
           category?: string
+          categories?: string[]
           status?: string
           progress?: number
           skills?: string[]

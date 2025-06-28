@@ -220,13 +220,26 @@ export default function LearningPage() {
                 </div>
               </div>
 
-              {/* Skills */}
-              <div className="flex gap-2 flex-wrap mb-4">
-                {entry.skills.map(skill => (
-                  <span key={skill} className="text-xs bg-gray-800 text-gray-300 px-3 py-1 rounded-full">
-                    {skill}
-                  </span>
-                ))}
+              {/* Categories and Skills */}
+              <div className="space-y-2 mb-4">
+                {entry.categories && entry.categories.length > 0 && (
+                  <div className="flex gap-2 flex-wrap">
+                    {entry.categories.map(cat => (
+                      <span key={cat} className="text-xs bg-blue-600/20 text-blue-400 px-3 py-1 rounded-full">
+                        {cat}
+                      </span>
+                    ))}
+                  </div>
+                )}
+                {entry.skills && entry.skills.length > 0 && (
+                  <div className="flex gap-2 flex-wrap">
+                    {entry.skills.map(skill => (
+                      <span key={skill} className="text-xs bg-gray-800 text-gray-300 px-3 py-1 rounded-full">
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Date */}

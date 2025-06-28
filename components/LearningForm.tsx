@@ -56,7 +56,7 @@ export function LearningForm({ onClose, entry }: LearningFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [date, setDate] = useState<Date | undefined>(entry?.start_date ? new Date(entry.start_date) : new Date())
   const [selectedCategories, setSelectedCategories] = useState<string[]>(
-    entry?.category ? [entry.category] : []
+    entry?.categories || (entry?.category ? [entry.category] : [])
   )
   const [customCategory, setCustomCategory] = useState("")
   const { createEntry, updateEntry } = useLearningEntries()
@@ -90,9 +90,10 @@ export function LearningForm({ onClose, entry }: LearningFormProps) {
         title: data.title,
         description: data.description,
         category: selectedCategories[0] || "OTHER", // 主カテゴリーとして最初のものを使用
+        categories: selectedCategories,
         status: data.status,
         progress: data.progress,
-        skills: [...data.skills.split(",").map(s => s.trim()).filter(s => s), ...selectedCategories],
+        skills: data.skills.split(",").map(s => s.trim()).filter(s => s),
         difficulty_level: data.difficulty_level,
         estimated_hours: null,
         completed_hours: data.study_hours,
