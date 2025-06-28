@@ -85,6 +85,7 @@ export function ProjectForm({ onClose, project }: ProjectFormProps) {
 
       console.log("Submitting project data:", projectData)
       console.log("Project ID:", project?.id)
+      console.log("Is editing:", !!project?.id)
 
       if (project?.id) {
         const result = await updateProject(project.id, projectData)

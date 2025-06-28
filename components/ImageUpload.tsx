@@ -14,6 +14,7 @@ interface ImageUploadProps {
 
 export function ImageUpload({ value, onChange, disabled }: ImageUploadProps) {
   const [uploading, setUploading] = useState(false)
+  const [isDragOver, setIsDragOver] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const uploadImage = async (file: File) => {
@@ -80,10 +81,7 @@ export function ImageUpload({ value, onChange, disabled }: ImageUploadProps) {
     }
   }
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-
+  const validateAndUploadFile = (file: File) => {
     // ファイルサイズチェック（5MB制限）
     if (file.size > 5 * 1024 * 1024) {
       toast.error("ファイルサイズは5MB以下にしてください")
@@ -99,6 +97,49 @@ export function ImageUpload({ value, onChange, disabled }: ImageUploadProps) {
     uploadImage(file)
   }
 
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    validateAndUploadFile(file)
+  }
+
+  const handleDragEnter = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (!disabled && !uploading) {
+      setIsDragOver(true)
+    }
+  }
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragOver(false)
+  }
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+  }
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragOver(false)
+
+    if (disabled || uploading) return
+
+    const files = Array.from(e.dataTransfer.files)
+    const imageFile = files.find(file => file.type.startsWith('image/'))
+
+    if (!imageFile) {
+      toast.error("画像ファイルをドロップしてください")
+      return
+    }
+
+    validateAndUploadFile(imageFile)
+  }
+
   return (
     <div className="space-y-4">
       <input
@@ -112,11 +153,11 @@ export function ImageUpload({ value, onChange, disabled }: ImageUploadProps) {
 
       {value ? (
         <div className="relative">
-          <div className="w-full h-48 rounded-lg overflow-hidden border border-gray-700">
+          <div className="w-full h-48 rounded-lg overflow-hidden border border-gray-700 bg-gray-800 flex items-center justify-center">
             <img
               src={value}
               alt="プロジェクト画像"
-              className="w-full h-full object-cover"
+              className="max-w-full max-h-full object-contain"
             />
           </div>
           <Button
@@ -133,17 +174,32 @@ export function ImageUpload({ value, onChange, disabled }: ImageUploadProps) {
       ) : (
         <div
           onClick={() => fileInputRef.current?.click()}
-          className="w-full h-48 border-2 border-dashed border-gray-700 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-gray-600 transition-colors"
+          onDragEnter={handleDragEnter}
+          onDragLeave={handleDragLeave}
+          onDragOver={handleDragOver}
+          onDrop={handleDrop}
+          className={`w-full h-48 border-2 border-dashed rounded-lg flex flex-col items-center justify-center cursor-pointer transition-colors ${
+            isDragOver
+              ? "border-blue-500 bg-blue-500/10"
+              : uploading
+              ? "border-gray-600 bg-gray-800/50"
+              : "border-gray-700 hover:border-gray-600"
+          }`}
         >
           {uploading ? (
             <>
               <Loader2 className="h-8 w-8 text-gray-400 animate-spin mb-2" />
               <p className="text-gray-400 text-sm">アップロード中...</p>
             </>
+          ) : isDragOver ? (
+            <>
+              <Upload className="h-8 w-8 text-blue-400 mb-2" />
+              <p className="text-blue-400 text-sm font-medium">ここに画像をドロップ</p>
+            </>
           ) : (
             <>
               <ImageIcon className="h-8 w-8 text-gray-400 mb-2" />
-              <p className="text-gray-400 text-sm">クリックして画像をアップロード</p>
+              <p className="text-gray-400 text-sm">クリックまたはドラッグ&ドロップで画像をアップロード</p>
               <p className="text-gray-500 text-xs mt-1">PNG, JPG, WebP, GIF (最大5MB)</p>
             </>
           )}

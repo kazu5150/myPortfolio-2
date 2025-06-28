@@ -17,6 +17,7 @@ export default function ProjectDetailPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false)
 
   useEffect(() => {
     if (params.id) {
@@ -140,11 +141,11 @@ export default function ProjectDetailPage() {
           <div className="flex items-start justify-between mb-6">
             <div className="flex items-center gap-4">
               {project.image_url ? (
-                <div className="w-16 h-16 rounded-lg overflow-hidden">
+                <div className="w-16 h-16 rounded-lg overflow-hidden border border-gray-600 shadow-md bg-gray-700 flex items-center justify-center">
                   <img 
                     src={project.image_url} 
                     alt={project.title}
-                    className="w-full h-full object-cover"
+                    className="max-w-full max-h-full object-contain"
                   />
                 </div>
               ) : (
@@ -182,12 +183,21 @@ export default function ProjectDetailPage() {
           {/* Large Project Image */}
           {project.image_url && (
             <div className="mb-6">
-              <div className="w-full h-64 rounded-lg overflow-hidden">
+              <div 
+                className="w-full h-64 rounded-lg overflow-hidden border border-gray-700 shadow-xl bg-gray-800 flex items-center justify-center cursor-pointer group/image relative"
+                onClick={() => setIsImageModalOpen(true)}
+              >
                 <img 
                   src={project.image_url} 
                   alt={project.title}
-                  className="w-full h-full object-cover"
+                  className="max-w-full max-h-full object-contain group-hover/image:scale-105 transition-transform duration-300"
                 />
+                {/* Overlay hint */}
+                <div className="absolute inset-0 bg-black/20 opacity-0 group-hover/image:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                  <div className="bg-black/60 text-white px-3 py-1 rounded-full text-sm">
+                    クリックで拡大
+                  </div>
+                </div>
               </div>
             </div>
           )}
@@ -353,6 +363,27 @@ export default function ProjectDetailPage() {
                 fetchProject(project.id)
               }} 
             />
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Image Modal */}
+      <Dialog open={isImageModalOpen} onOpenChange={setIsImageModalOpen}>
+        <DialogContent className="max-w-6xl max-h-[90vh] p-0 bg-black/90 border-0">
+          <div className="relative w-full h-full flex items-center justify-center p-4">
+            <img 
+              src={project?.image_url || ''} 
+              alt={project?.title || ''}
+              className="max-w-full max-h-full object-contain"
+            />
+            <button
+              onClick={() => setIsImageModalOpen(false)}
+              className="absolute top-4 right-4 p-2 bg-black/50 hover:bg-black/70 text-white rounded-full transition-colors"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
           </div>
         </DialogContent>
       </Dialog>
