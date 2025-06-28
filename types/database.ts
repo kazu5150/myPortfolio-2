@@ -14,6 +14,10 @@ export type Database = {
           id: string
           title: string
           description: string | null
+          detailed_content: string | null
+          next_steps: string | null
+          work_in_progress_url: string | null
+          image_url: string | null
           category: string
           status: string
           progress: number
@@ -29,6 +33,10 @@ export type Database = {
           id?: string
           title: string
           description?: string | null
+          detailed_content?: string | null
+          next_steps?: string | null
+          work_in_progress_url?: string | null
+          image_url?: string | null
           category?: string
           status?: string
           progress?: number
@@ -44,6 +52,10 @@ export type Database = {
           id?: string
           title?: string
           description?: string | null
+          detailed_content?: string | null
+          next_steps?: string | null
+          work_in_progress_url?: string | null
+          image_url?: string | null
           category?: string
           status?: string
           progress?: number

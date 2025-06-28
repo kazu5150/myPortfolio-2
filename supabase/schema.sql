@@ -6,6 +6,9 @@ CREATE TABLE projects (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   title TEXT NOT NULL,
   description TEXT,
+  detailed_content TEXT, -- プロジェクトの詳細内容
+  next_steps TEXT, -- ネクストステップ
+  work_in_progress_url TEXT, -- 作成中プロジェクトのリンク
   category TEXT NOT NULL DEFAULT 'OTHER',
   status TEXT NOT NULL DEFAULT 'PLANNING',
   progress INTEGER DEFAULT 0 CHECK (progress >= 0 AND progress <= 100),

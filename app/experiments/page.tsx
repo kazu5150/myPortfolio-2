@@ -167,11 +167,26 @@ export default function ExperimentsPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {filteredProjects.map(project => (
             <div key={project.id} className="bg-gray-900 border border-gray-800 rounded-lg p-6 hover:border-gray-700 transition-colors">
+              {/* Project Image */}
+              {project.image_url && (
+                <div className="mb-4">
+                  <div className="w-full h-48 rounded-lg overflow-hidden">
+                    <img 
+                      src={project.image_url} 
+                      alt={project.title}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                </div>
+              )}
+              
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
-                    <Code2 className="h-6 w-6 text-white" />
-                  </div>
+                  {!project.image_url && (
+                    <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
+                      <Code2 className="h-6 w-6 text-white" />
+                    </div>
+                  )}
                   <div>
                     <h3 className="text-lg font-medium text-white">{project.title}</h3>
                     <span className="text-sm text-gray-500 bg-gray-800 px-2 py-1 rounded">
@@ -236,9 +251,12 @@ export default function ExperimentsPage() {
                     デモ
                   </a>
                 )}
-                <button className="px-4 py-2 bg-cyan-600/20 text-cyan-400 rounded-lg hover:bg-cyan-600/30 transition-colors">
+                <a 
+                  href={`/experiments/${project.id}`}
+                  className="px-4 py-2 bg-cyan-600/20 text-cyan-400 rounded-lg hover:bg-cyan-600/30 transition-colors"
+                >
                   詳細を見る
-                </button>
+                </a>
                 <button 
                   onClick={() => handleDelete(project.id)}
                   className="ml-auto p-2 text-gray-500 hover:text-red-400 transition-colors"

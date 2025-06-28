@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
+import { ImageUpload } from "@/components/ImageUpload"
 import { useProjects } from "@/hooks/useProjects"
 import { ProjectInsert, ProjectCategory, ProjectStatus } from "@/types/database"
 import { toast } from "sonner"
@@ -17,6 +18,10 @@ import { Loader2 } from "lucide-react"
 const projectSchema = z.object({
   title: z.string().min(1, "タイトルは必須です"),
   description: z.string().optional(),
+  detailed_content: z.string().optional(),
+  next_steps: z.string().optional(),
+  work_in_progress_url: z.string().optional(),
+  image_url: z.string().optional(),
   category: z.enum(["WEB", "MOBILE", "AI", "GAME", "TOOL", "OTHER"]),
   status: z.enum(["PLANNING", "IN_PROGRESS", "TESTING", "COMPLETED", "PAUSED"]),
   progress: z.number().min(0).max(100),
@@ -48,6 +53,10 @@ export function ProjectForm({ onClose, project }: ProjectFormProps) {
     defaultValues: {
       title: project?.title || "",
       description: project?.description || "",
+      detailed_content: project?.detailed_content || "",
+      next_steps: project?.next_steps || "",
+      work_in_progress_url: project?.work_in_progress_url || "",
+      image_url: project?.image_url || "",
       category: (project?.category as ProjectCategory) || "OTHER",
       status: (project?.status as ProjectStatus) || "PLANNING",
       progress: project?.progress || 0,
@@ -67,20 +76,30 @@ export function ProjectForm({ onClose, project }: ProjectFormProps) {
         technologies: data.technologies.split(",").map(t => t.trim()).filter(t => t),
         start_date: data.start_date || null,
         demo_url: data.demo_url || null,
-        github_url: data.github_url || null
+        github_url: data.github_url || null,
+        detailed_content: data.detailed_content || null,
+        next_steps: data.next_steps || null,
+        work_in_progress_url: data.work_in_progress_url || null,
+        image_url: data.image_url || null
       }
 
+      console.log("Submitting project data:", projectData)
+      console.log("Project ID:", project?.id)
+
       if (project?.id) {
-        await updateProject(project.id, projectData)
+        const result = await updateProject(project.id, projectData)
+        console.log("Update result:", result)
         toast.success("プロジェクトを更新しました")
       } else {
-        await createProject(projectData)
+        const result = await createProject(projectData)
+        console.log("Create result:", result)
         toast.success("プロジェクトを作成しました")
       }
       
       onClose()
     } catch (error) {
-      toast.error("操作に失敗しました")
+      console.error("Submit error:", error)
+      toast.error(`操作に失敗しました: ${error instanceof Error ? error.message : 'Unknown error'}`)
     } finally {
       setIsSubmitting(false)
     }
@@ -101,11 +120,31 @@ export function ProjectForm({ onClose, project }: ProjectFormProps) {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="description">説明</Label>
+        <Label htmlFor="description">概要</Label>
         <Textarea
           id="description"
           {...register("description")}
-          placeholder="プロジェクトの説明"
+          placeholder="プロジェクトの概要（簡潔な説明）"
+          rows={2}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="detailed_content">詳細内容</Label>
+        <Textarea
+          id="detailed_content"
+          {...register("detailed_content")}
+          placeholder="プロジェクトの詳細な内容、技術的な説明、課題と解決策など..."
+          rows={6}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="next_steps">ネクストステップ</Label>
+        <Textarea
+          id="next_steps"
+          {...register("next_steps")}
+          placeholder="今後の予定、改善点、追加したい機能など..."
           rows={3}
         />
       </div>
@@ -181,23 +220,43 @@ export function ProjectForm({ onClose, project }: ProjectFormProps) {
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="demo_url">デモURL</Label>
-          <Input
-            id="demo_url"
-            {...register("demo_url")}
-            placeholder="https://..."
+          <Label>プロジェクト画像</Label>
+          <ImageUpload
+            value={watch("image_url") || ""}
+            onChange={(url) => setValue("image_url", url || "")}
+            disabled={isSubmitting}
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="github_url">GitHub URL</Label>
+          <Label htmlFor="work_in_progress_url">作成中プロジェクトのリンク</Label>
           <Input
-            id="github_url"
-            {...register("github_url")}
-            placeholder="https://github.com/..."
+            id="work_in_progress_url"
+            {...register("work_in_progress_url")}
+            placeholder="https://... (開発中のアプリやプロトタイプのURL)"
           />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="demo_url">デモURL</Label>
+            <Input
+              id="demo_url"
+              {...register("demo_url")}
+              placeholder="https://..."
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="github_url">GitHub URL</Label>
+            <Input
+              id="github_url"
+              {...register("github_url")}
+              placeholder="https://github.com/..."
+            />
+          </div>
         </div>
       </div>
 

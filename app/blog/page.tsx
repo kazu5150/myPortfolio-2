@@ -206,10 +206,13 @@ export default function BlogPage() {
               
               {/* Actions */}
               <div className="flex gap-2 pt-4 border-t border-gray-800">
-                <button className="px-4 py-2 bg-cyan-600/20 text-cyan-400 rounded-lg hover:bg-cyan-600/30 transition-colors flex items-center gap-2">
+                <a 
+                  href={`/blog/${post.slug}`}
+                  className="px-4 py-2 bg-cyan-600/20 text-cyan-400 rounded-lg hover:bg-cyan-600/30 transition-colors flex items-center gap-2"
+                >
                   <Eye className="h-4 w-4" />
                   読む
-                </button>
+                </a>
                 
                 <Dialog open={editingPost?.id === post.id} onOpenChange={(open) => !open && setEditingPost(null)}>
                   <DialogTrigger asChild>
