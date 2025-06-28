@@ -9,11 +9,16 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
+import { Calendar } from "@/components/ui/calendar"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { ImageUpload } from "@/components/ImageUpload"
 import { useProjects } from "@/hooks/useProjects"
 import { ProjectInsert, ProjectCategory, ProjectStatus } from "@/types/database"
 import { toast } from "sonner"
-import { Loader2 } from "lucide-react"
+import { Loader2, CalendarIcon } from "lucide-react"
+import { format } from "date-fns"
+import { ja } from "date-fns/locale"
+import { cn } from "@/lib/utils"
 
 const projectSchema = z.object({
   title: z.string().min(1, "タイトルは必須です"),
@@ -26,7 +31,7 @@ const projectSchema = z.object({
   status: z.enum(["PLANNING", "IN_PROGRESS", "TESTING", "COMPLETED", "PAUSED"]),
   progress: z.number().min(0).max(100),
   technologies: z.string(),
-  start_date: z.string().optional(),
+  start_date: z.date().optional(),
   demo_url: z.string().optional(),
   github_url: z.string().optional()
 })
@@ -61,7 +66,7 @@ export function ProjectForm({ onClose, project }: ProjectFormProps) {
       status: (project?.status as ProjectStatus) || "PLANNING",
       progress: project?.progress || 0,
       technologies: project?.technologies?.join(", ") || "",
-      start_date: project?.start_date || "",
+      start_date: project?.start_date ? new Date(project.start_date) : undefined,
       demo_url: project?.demo_url || "",
       github_url: project?.github_url || ""
     }
@@ -74,7 +79,7 @@ export function ProjectForm({ onClose, project }: ProjectFormProps) {
       const projectData: ProjectInsert = {
         ...data,
         technologies: data.technologies.split(",").map(t => t.trim()).filter(t => t),
-        start_date: data.start_date || null,
+        start_date: data.start_date?.toISOString().split('T')[0] || null,
         demo_url: data.demo_url || null,
         github_url: data.github_url || null,
         detailed_content: data.detailed_content || null,
@@ -213,12 +218,35 @@ export function ProjectForm({ onClose, project }: ProjectFormProps) {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="start_date">開始日</Label>
-        <Input
-          id="start_date"
-          type="date"
-          {...register("start_date")}
-        />
+        <Label>開始日</Label>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              className={cn(
+                "w-full justify-start text-left font-normal bg-gray-900 border-gray-800 text-gray-100",
+                !watch("start_date") && "text-gray-500"
+              )}
+            >
+              <CalendarIcon className="mr-2 h-4 w-4" />
+              {watch("start_date") ? (
+                format(watch("start_date")!, "yyyy年MM月dd日", { locale: ja })
+              ) : (
+                <span>日付を選択</span>
+              )}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0 bg-gray-900 border-gray-800">
+            <Calendar
+              mode="single"
+              selected={watch("start_date")}
+              onSelect={(date) => setValue("start_date", date)}
+              initialFocus
+              locale={ja}
+              className="bg-gray-900 text-gray-100"
+            />
+          </PopoverContent>
+        </Popover>
       </div>
 
       <div className="space-y-4">
