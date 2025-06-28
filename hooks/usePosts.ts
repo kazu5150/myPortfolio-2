@@ -18,10 +18,16 @@ export function usePosts(includeUnpublished = false) {
       let query = supabase
         .from('posts')
         .select('*')
-        .order('created_at', { ascending: false })
 
       if (!includeUnpublished) {
-        query = query.eq('status', 'PUBLISHED')
+        query = query
+          .eq('status', 'PUBLISHED')
+          .order('published_at', { ascending: false, nullsLast: true })
+          .order('updated_at', { ascending: false })
+      } else {
+        query = query
+          .order('updated_at', { ascending: false })
+          .order('created_at', { ascending: false })
       }
 
       const { data, error } = await query

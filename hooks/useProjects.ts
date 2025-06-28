@@ -18,6 +18,7 @@ export function useProjects() {
       const { data, error } = await supabase
         .from('projects')
         .select('*')
+        .order('updated_at', { ascending: false })
         .order('created_at', { ascending: false })
 
       if (error) throw error
