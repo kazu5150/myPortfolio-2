@@ -17,37 +17,104 @@ No test framework is currently configured. Consider using `pnpm test` with Jest 
 
 ## Architecture
 
-This is a Next.js 15 application using the App Router with a Three.js-powered 3D globe visualization as the centerpiece.
+This is a Next.js 15 portfolio application featuring a Three.js-powered 3D globe and a complete content management system using Supabase. The app showcases experimental projects, learning journey entries, and blog posts with full CRUD functionality.
 
-### Key Components
+### Content Management System
 
-**Globe.tsx** - The main feature, implementing:
-- WebGL globe with Three.js using texture mapping and atmospheric shaders
-- Color-cycling animation through predefined color palette
-- OrbitControls for user interaction
-- Progressive loading (wireframe → textured)
-- Fallback handling for missing textures
+The application is built around three main content types managed through Supabase:
 
-**UI Components** - Extensive shadcn/ui component library in `components/ui/` providing a complete design system. Components use Radix UI primitives with Tailwind styling.
+**Projects (Experimental Projects)** - `/app/experiments/`
+- Full project lifecycle tracking with detailed content, next steps, and work-in-progress URLs
+- Image upload support via Supabase Storage with drag-and-drop functionality
+- Status tracking (PLANNING → IN_PROGRESS → TESTING → COMPLETED → PAUSED)
+- Category filtering (WEB, MOBILE, AI, GAME, TOOL, OTHER)
+- Progress tracking with visual progress bars
+- Demo and GitHub URL links
+- Calendar picker for start date selection using Japanese locale
+
+**Learning Entries (Learning Journey)** - `/app/learning/`
+- Daily learning log with date picker, study hours tracking, and multi-category support
+- Simplified workflow without estimated hours or completion dates
+- Skills and resources tracking
+- Difficulty levels (BEGINNER, INTERMEDIATE, ADVANCED)
+- Multi-category selection support
+
+**Posts (Blog)** - `/app/blog/`
+- Blog post management with draft/published states
+- Slug-based routing with SEO-friendly URLs
+- Tags and reading time estimation
+- Featured image support
+
+### Database Schema
+
+**Supabase PostgreSQL** with three main tables:
+- `projects` - Enhanced with `detailed_content`, `next_steps`, `work_in_progress_url`, `image_url`
+- `learning_entries` - Supports `categories` array and `completed_hours` as DECIMAL(6,2)
+- `posts` - Full blog functionality with publishing workflow
+
+**Key Database Features:**
+- Auto-updating `updated_at` timestamps via triggers
+- Row Level Security (RLS) enabled with permissive policies
+- Performance indexes on commonly queried fields
+- UUID primary keys with auto-generation
+
+### Custom React Hooks
+
+**CRUD Operations:**
+- `useProjects()` - Projects CRUD with filtering and sorting
+- `useLearningEntries()` - Learning entries management
+- `usePosts()` - Blog posts with publish/draft states
+- Individual item hooks: `useProject(id)`, `useLearningEntry(id)`, `usePost(slug)`
+
+**Data Flow:**
+- All hooks sort by `updated_at` DESC, then `created_at` DESC for newest-first display
+- Real-time optimistic updates to local state
+- Consistent error handling with toast notifications
+
+### Form Components and UI
+
+**Form Components:**
+- `ProjectForm` - Calendar picker, image upload, comprehensive project data
+- `LearningForm` - Simplified daily learning log with Japanese date formatting
+- `PostForm` - Blog post editor with slug generation and publishing workflow
+
+**Image Management:**
+- `ImageUpload` - Drag-and-drop file upload to Supabase Storage
+- Image validation, resizing, and error handling
+- Modal display for full-size image viewing
+- Consistent styling with borders and shadows
 
 ### Tech Stack
 
-- **Next.js 15** with App Router
-- **React 19** with TypeScript
-- **Three.js** for 3D graphics
-- **Tailwind CSS** with custom theming
-- **shadcn/ui** component library
-- **Framer Motion** for animations
-- **pnpm** package manager
+- **Next.js 15** with App Router and React 19
+- **Supabase** for PostgreSQL database, real-time subscriptions, and file storage
+- **React Hook Form** with Zod validation for type-safe forms
+- **shadcn/ui** component library with Radix UI primitives
+- **Three.js** for 3D globe visualization with color-cycling animation
+- **Tailwind CSS** with dark theme optimization
+- **date-fns** with Japanese locale support for date formatting
+- **TypeScript** with comprehensive database type definitions
+
+### Environment Configuration
+
+**Required Environment Variables:**
+```
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
+
+The Supabase client gracefully handles missing environment variables during development.
 
 ### Important Notes
 
-1. **Missing Assets**: The Globe component references Earth texture files that don't exist in `/public/`. It gracefully falls back to wireframe mode.
+1. **Database Schema Evolution**: The schema has been enhanced with additional columns. Use `ALTER TABLE` commands when adding new fields to maintain data consistency.
 
-2. **Build Configuration**: TypeScript and ESLint errors are ignored during builds (see `next.config.ts`). Fix these before production deployment.
+2. **Image Storage**: Supabase Storage bucket must be configured for image upload functionality. The application handles upload errors gracefully.
 
-3. **Unused Components**: Contact.tsx exists but isn't integrated into the main page.
+3. **Form Validation**: All forms use Zod schemas for validation with Japanese error messages. Date fields use calendar pickers with Japanese locale formatting.
 
-4. **Theme System**: Dark mode infrastructure is set up but the app currently uses a fixed black background.
+4. **Content Sorting**: All content lists are sorted by newest updates first (`updated_at` DESC) to show recently modified items at the top.
 
-5. **Performance**: Three.js globe runs continuously. Consider implementing viewport visibility detection to pause rendering when off-screen.
+5. **Type Safety**: Database types are auto-generated in `/types/database.ts` with convenience types for each table operation (Insert, Update, Row).
+
+6. **Three.js Globe**: Still references missing Earth texture files in `/public/` and falls back to wireframe mode. Consider implementing viewport visibility detection for performance optimization.
