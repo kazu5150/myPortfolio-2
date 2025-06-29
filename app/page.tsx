@@ -6,6 +6,7 @@ import Link from "next/link"
 import { Github, Linkedin, Mail, ChevronDown } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useSidebarState } from "@/hooks/useSidebarState"
+import { Chatbot } from "@/components/chatbot"
 
 const Globe = dynamic<{ onColorChange?: (color: { from: string; to: string }) => void }>(
   () => import("@/components/Globe"), 
@@ -139,6 +140,9 @@ export default function Home() {
 
       {/* About Me Section */}
       <AboutMe />
+
+      {/* Chatbot */}
+      <Chatbot />
     </div>
   )
 }
