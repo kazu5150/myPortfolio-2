@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Home, GraduationCap, Beaker, BookOpen, LayoutDashboard, Mail, Code2, Menu, X, ChevronLeft, ChevronRight } from "lucide-react"
+import { Home, BookOpen, LayoutDashboard, Mail, Code2, Menu, X, ChevronLeft, ChevronRight } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useState, useEffect } from "react"
 
@@ -12,18 +12,6 @@ const navigation = [
     href: "/",
     icon: Home,
     description: "Welcome page",
-  },
-  {
-    name: "Learning Journey",
-    href: "/learning",
-    icon: GraduationCap,
-    description: "Study progress & analytics",
-  },
-  {
-    name: "Experiments",
-    href: "/experiments",
-    icon: Beaker,
-    description: "Projects & prototypes",
   },
   {
     name: "Blog",

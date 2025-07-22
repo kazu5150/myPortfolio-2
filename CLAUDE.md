@@ -17,7 +17,7 @@ No test framework is currently configured. Consider using `pnpm test` with Jest 
 
 ## Architecture
 
-This is a Next.js 15 portfolio application featuring a Three.js-powered 3D globe and a complete content management system using Supabase. The app showcases experimental projects, learning journey entries, and blog posts with full CRUD functionality.
+This is a Next.js 15 portfolio application featuring a Three.js-powered 3D globe, a complete content management system using Supabase, and an AI-powered chatbot. The app showcases experimental projects, learning journey entries, and blog posts with full CRUD functionality.
 
 ### Content Management System
 
@@ -44,6 +44,16 @@ The application is built around three main content types managed through Supabas
 - Slug-based routing with SEO-friendly URLs
 - Tags and reading time estimation
 - Featured image support
+
+### AI Chatbot Integration
+
+**OpenAI-Powered Chat Assistant** - `/components/chatbot.tsx`
+- Floating chat button with gradient styling on all pages
+- Real-time chat interface with typing indicators
+- Uses GPT-3.5-turbo model via `/api/chat` endpoint
+- Japanese language UI with localized messages
+- No chat history persistence (memory lost on refresh)
+- Requires `OPENAI_API_KEY` environment variable
 
 ### Database Schema
 
@@ -94,6 +104,7 @@ The application is built around three main content types managed through Supabas
 - **Tailwind CSS** with dark theme optimization
 - **date-fns** with Japanese locale support for date formatting
 - **TypeScript** with comprehensive database type definitions
+- **OpenAI SDK** for AI chat functionality
 
 ### Environment Configuration
 
@@ -101,9 +112,10 @@ The application is built around three main content types managed through Supabas
 ```
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+OPENAI_API_KEY=your_openai_api_key
 ```
 
-The Supabase client gracefully handles missing environment variables during development.
+The Supabase client gracefully handles missing environment variables during development. The OpenAI API key is required for chatbot functionality.
 
 ### Important Notes
 
@@ -118,3 +130,9 @@ The Supabase client gracefully handles missing environment variables during deve
 5. **Type Safety**: Database types are auto-generated in `/types/database.ts` with convenience types for each table operation (Insert, Update, Row).
 
 6. **Three.js Globe**: Still references missing Earth texture files in `/public/` and falls back to wireframe mode. Consider implementing viewport visibility detection for performance optimization.
+
+7. **Build Configuration**: The `next.config.mjs` is configured to ignore both ESLint and TypeScript errors during builds. This can hide potential issues in production.
+
+8. **Authentication**: Currently no authentication is implemented. All database operations are publicly accessible through Supabase's permissive RLS policies.
+
+9. **API Security**: The `/api/chat` endpoint has no rate limiting or authentication, which could lead to API abuse and unexpected OpenAI costs.

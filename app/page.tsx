@@ -93,7 +93,7 @@ export default function Home() {
           {/* CTA Button */}
           <div className="pt-8">
             <Link
-              href="/learning"
+              href="/blog"
               className="inline-flex items-center px-6 md:px-8 py-3 md:py-4 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-full text-base md:text-lg font-medium hover:from-cyan-600 hover:to-blue-700 transition-all duration-200 shadow-lg shadow-cyan-500/25"
             >
               Start exploring
