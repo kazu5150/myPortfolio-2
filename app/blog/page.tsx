@@ -152,111 +152,125 @@ export default function BlogPage() {
         {/* Posts Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {filteredPosts.map(post => (
-            <article key={post.id} className="bg-gray-900 border border-gray-800 rounded-lg p-6 hover:border-gray-700 transition-colors">
-              {/* Status Badge */}
-              <div className="flex items-center justify-between mb-4">
-                <Badge className={cn("text-xs", getStatusColor(post.status))}>
-                  {getStatusLabel(post.status)}
-                </Badge>
-                <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center">
-                  <FileText className="h-4 w-4 text-white" />
+            <article key={post.id} className="bg-gray-900 border border-gray-800 rounded-lg overflow-hidden hover:border-gray-700 transition-colors">
+              {/* Featured Image */}
+              {post.featured_image_url ? (
+                <div className="w-full h-48 overflow-hidden">
+                  <img
+                    src={post.featured_image_url}
+                    alt={post.title}
+                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                  />
                 </div>
-              </div>
+              ) : (
+                <div className="w-full h-48 bg-gradient-to-br from-purple-600/20 to-blue-600/20 flex items-center justify-center">
+                  <FileText className="h-12 w-12 text-gray-400" />
+                </div>
+              )}
 
-              {/* Title */}
-              <h2 className="text-lg font-medium text-white hover:text-cyan-400 transition-colors cursor-pointer mb-3 line-clamp-2">
-                {post.title}
-              </h2>
-              
-              {/* Excerpt */}
-              {post.excerpt && (
-                <p className="text-gray-400 text-sm mb-4 line-clamp-3">{post.excerpt}</p>
-              )}
-              
-              {/* Tags */}
-              {post.tags.length > 0 && (
-                <div className="flex gap-1 flex-wrap mb-4">
-                  {post.tags.slice(0, 2).map(tag => (
-                    <span key={tag} className="text-xs bg-gray-800 text-gray-300 px-2 py-1 rounded-full">
-                      #{tag}
-                    </span>
-                  ))}
-                  {post.tags.length > 2 && (
-                    <span className="text-xs text-gray-500">
-                      +{post.tags.length - 2}
-                    </span>
-                  )}
+              <div className="p-6">
+                {/* Status Badge */}
+                <div className="flex items-center justify-between mb-4">
+                  <Badge className={cn("text-xs", getStatusColor(post.status))}>
+                    {getStatusLabel(post.status)}
+                  </Badge>
                 </div>
-              )}
-              
-              {/* Meta Info */}
-              <div className="space-y-2 text-xs text-gray-500 mb-4">
-                <div className="flex items-center gap-1">
-                  <Calendar className="h-3 w-3" />
-                  <span>
-                    {post.status === 'PUBLISHED' && post.published_at
-                      ? formatDate(post.published_at)
-                      : formatDate(post.created_at)
-                    }
-                  </span>
-                </div>
-                {post.reading_time && (
-                  <div className="flex items-center gap-1">
-                    <Clock className="h-3 w-3" />
-                    <span>{post.reading_time}分</span>
+
+                {/* Title */}
+                <h2 className="text-lg font-medium text-white hover:text-cyan-400 transition-colors cursor-pointer mb-3 line-clamp-2">
+                  {post.title}
+                </h2>
+                
+                {/* Excerpt */}
+                {post.excerpt && (
+                  <p className="text-gray-400 text-sm mb-4 line-clamp-3">{post.excerpt}</p>
+                )}
+                
+                {/* Tags */}
+                {post.tags.length > 0 && (
+                  <div className="flex gap-1 flex-wrap mb-4">
+                    {post.tags.slice(0, 2).map(tag => (
+                      <span key={tag} className="text-xs bg-gray-800 text-gray-300 px-2 py-1 rounded-full">
+                        #{tag}
+                      </span>
+                    ))}
+                    {post.tags.length > 2 && (
+                      <span className="text-xs text-gray-500">
+                        +{post.tags.length - 2}
+                      </span>
+                    )}
                   </div>
                 )}
-              </div>
-              
-              {/* Actions */}
-              <div className="space-y-2">
-                <a 
-                  href={`/blog/${post.slug}`}
-                  className="w-full px-3 py-2 bg-cyan-600/20 text-cyan-400 rounded-lg hover:bg-cyan-600/30 transition-colors flex items-center justify-center gap-2 text-sm"
-                >
-                  <Eye className="h-3 w-3" />
-                  読む
-                </a>
                 
-                <div className="flex gap-2">
-                  <Dialog open={editingPost?.id === post.id} onOpenChange={(open) => !open && setEditingPost(null)}>
-                    <DialogTrigger asChild>
-                      <button 
-                        onClick={() => setEditingPost(post)}
-                        className="flex-1 px-3 py-2 bg-blue-600/20 text-blue-400 rounded-lg hover:bg-blue-600/30 transition-colors flex items-center justify-center gap-1 text-sm"
-                      >
-                        <Edit className="h-3 w-3" />
-                        編集
-                      </button>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-                      <DialogHeader>
-                        <DialogTitle>記事編集</DialogTitle>
-                      </DialogHeader>
-                      <div className="mt-4">
-                        <PostForm 
-                          post={editingPost} 
-                          onClose={() => setEditingPost(null)} 
-                        />
-                      </div>
-                    </DialogContent>
-                  </Dialog>
-                  
-                  {post.status === 'DRAFT' ? (
-                    <button 
-                      onClick={() => handlePublish(post.id)}
-                      className="flex-1 px-3 py-2 bg-green-600/20 text-green-400 rounded-lg hover:bg-green-600/30 transition-colors text-sm"
-                    >
-                      公開
-                    </button>
-                  ) : (
-                    <button 
-                      onClick={() => handleDelete(post.id)}
-                      className="flex-1 px-3 py-2 bg-red-600/20 text-red-400 rounded-lg hover:bg-red-600/30 transition-colors text-sm"
-                    >
-                      削除
-                    </button>
+                {/* Meta Info */}
+                <div className="space-y-2 text-xs text-gray-500 mb-4">
+                  <div className="flex items-center gap-1">
+                    <Calendar className="h-3 w-3" />
+                    <span>
+                      {post.status === 'PUBLISHED' && post.published_at
+                        ? formatDate(post.published_at)
+                        : formatDate(post.created_at)
+                      }
+                    </span>
+                  </div>
+                  {post.reading_time && (
+                    <div className="flex items-center gap-1">
+                      <Clock className="h-3 w-3" />
+                      <span>{post.reading_time}分</span>
+                    </div>
                   )}
+                </div>
+                
+                {/* Actions */}
+                <div className="space-y-2">
+                  <a 
+                    href={`/blog/${post.slug}`}
+                    className="w-full px-3 py-2 bg-cyan-600/20 text-cyan-400 rounded-lg hover:bg-cyan-600/30 transition-colors flex items-center justify-center gap-2 text-sm"
+                  >
+                    <Eye className="h-3 w-3" />
+                    読む
+                  </a>
+                  
+                  <div className="flex gap-2">
+                    <Dialog open={editingPost?.id === post.id} onOpenChange={(open) => !open && setEditingPost(null)}>
+                      <DialogTrigger asChild>
+                        <button 
+                          onClick={() => setEditingPost(post)}
+                          className="flex-1 px-3 py-2 bg-blue-600/20 text-blue-400 rounded-lg hover:bg-blue-600/30 transition-colors flex items-center justify-center gap-1 text-sm"
+                        >
+                          <Edit className="h-3 w-3" />
+                          編集
+                        </button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                        <DialogHeader>
+                          <DialogTitle>記事編集</DialogTitle>
+                        </DialogHeader>
+                        <div className="mt-4">
+                          <PostForm 
+                            post={editingPost} 
+                            onClose={() => setEditingPost(null)} 
+                          />
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                    
+                    {post.status === 'DRAFT' ? (
+                      <button 
+                        onClick={() => handlePublish(post.id)}
+                        className="flex-1 px-3 py-2 bg-green-600/20 text-green-400 rounded-lg hover:bg-green-600/30 transition-colors text-sm"
+                      >
+                        公開
+                      </button>
+                    ) : (
+                      <button 
+                        onClick={() => handleDelete(post.id)}
+                        className="flex-1 px-3 py-2 bg-red-600/20 text-red-400 rounded-lg hover:bg-red-600/30 transition-colors text-sm"
+                      >
+                        削除
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             </article>

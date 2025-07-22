@@ -113,6 +113,48 @@ export default function BlogDetailPage() {
     })
   }
 
+  const renderMarkdownToHtml = (markdown: string) => {
+    if (!markdown) return '<p class="text-gray-500">内容がありません</p>'
+    
+    // 見出しとdivとpreブロックを処理
+    const parts = markdown.split('\n\n')
+    const finalHtml = parts.map(part => {
+      const trimmed = part.trim()
+      if (!trimmed) return ''
+      
+      // 見出し
+      if (trimmed.match(/^#{1,3}\s/)) {
+        return trimmed
+          .replace(/^# (.*$)/gim, '<h1 class="text-2xl font-bold mb-6 mt-8 text-white">$1</h1>')
+          .replace(/^## (.*$)/gim, '<h2 class="text-xl font-semibold mb-4 mt-6 text-white">$1</h2>')
+          .replace(/^### (.*$)/gim, '<h3 class="text-lg font-medium mb-3 mt-4 text-white">$1</h3>')
+      }
+      
+      // 画像
+      if (trimmed.match(/^!\[.*\]\(.*\)/)) {
+        return trimmed.replace(/!\[([^\]]*)\]\(([^)]+)\)/gim, (_, alt, src) => {
+          return `<div class="my-6"><img src="${src}" alt="${alt}" class="max-w-full h-auto rounded-lg border border-gray-700 mx-auto block" style="max-height: 500px; object-fit: contain;" onError="this.parentNode.innerHTML='<div class=&quot;text-red-400 text-sm p-4 border border-red-600/20 rounded-lg&quot;>画像を読み込めませんでした: ${alt}</div>'" /></div>`
+        })
+      }
+      
+      // コードブロック
+      if (trimmed.match(/^```/)) {
+        return trimmed.replace(/```([^`]+)```/gim, '<pre class="bg-gray-800 border border-gray-700 rounded-lg p-4 my-4 overflow-x-auto"><code class="text-gray-100 text-sm">$1</code></pre>')
+      }
+      
+      // 通常の段落
+      const processedParagraph = trimmed
+        .replace(/\*\*(.*?)\*\*/gim, '<strong class="font-semibold text-white">$1</strong>')
+        .replace(/\*(.*?)\*/gim, '<em class="italic">$1</em>')
+        .replace(/\[([^\]]+)\]\(([^)]+)\)/gim, '<a href="$2" class="text-cyan-400 hover:text-cyan-300 underline" target="_blank" rel="noopener noreferrer">$1</a>')
+        .replace(/`([^`]+)`/gim, '<code class="bg-gray-800 px-2 py-1 rounded text-cyan-400 text-sm">$1</code>')
+      
+      return `<p class="mb-4 text-gray-300 leading-relaxed">${processedParagraph}</p>`
+    }).join('')
+    
+    return finalHtml
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen p-6 lg:p-12 flex items-center justify-center">
@@ -155,37 +197,76 @@ export default function BlogDetailPage() {
           </Button>
         </div>
 
-        {/* Article Header */}
-        <article className="bg-gray-900 border border-gray-800 rounded-lg p-8 mb-8">
-          <div className="flex items-start justify-between mb-6">
-            <div className="flex-1">
+        {/* Hero Section with Featured Image */}
+        {post.featured_image_url && (
+          <div className="relative w-full h-[400px] rounded-lg overflow-hidden mb-8">
+            <img
+              src={post.featured_image_url}
+              alt={post.title}
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+            <div className="absolute bottom-0 left-0 right-0 p-8">
               <div className="flex items-center gap-3 mb-4">
                 <Badge className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(post.status)}`}>
                   {getStatusLabel(post.status)}
                 </Badge>
                 {post.reading_time && (
-                  <div className="flex items-center gap-1 text-gray-400 text-sm">
+                  <div className="flex items-center gap-1 text-white/80 text-sm">
                     <Clock className="h-4 w-4" />
                     <span>{post.reading_time}分で読めます</span>
                   </div>
                 )}
               </div>
-              <h1 className="text-3xl lg:text-4xl font-bold text-white mb-4 leading-tight">
+              <h1 className="text-3xl lg:text-5xl font-bold text-white mb-4 leading-tight">
                 {post.title}
               </h1>
               {post.excerpt && (
-                <p className="text-xl text-gray-300 leading-relaxed mb-6">
+                <p className="text-xl text-white/90 leading-relaxed max-w-3xl">
                   {post.excerpt}
                 </p>
               )}
             </div>
-            <div className="w-16 h-16 bg-purple-600 rounded-lg flex items-center justify-center ml-6">
-              <FileText className="h-8 w-8 text-white" />
-            </div>
           </div>
+        )}
+
+        {/* Article Header (for posts without featured image) */}
+        {!post.featured_image_url && (
+          <article className="bg-gray-900 border border-gray-800 rounded-lg p-8 mb-8">
+            <div className="flex items-start justify-between mb-6">
+              <div className="flex-1">
+                <div className="flex items-center gap-3 mb-4">
+                  <Badge className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(post.status)}`}>
+                    {getStatusLabel(post.status)}
+                  </Badge>
+                  {post.reading_time && (
+                    <div className="flex items-center gap-1 text-gray-400 text-sm">
+                      <Clock className="h-4 w-4" />
+                      <span>{post.reading_time}分で読めます</span>
+                    </div>
+                  )}
+                </div>
+                <h1 className="text-3xl lg:text-4xl font-bold text-white mb-4 leading-tight">
+                  {post.title}
+                </h1>
+                {post.excerpt && (
+                  <p className="text-xl text-gray-300 leading-relaxed mb-6">
+                    {post.excerpt}
+                  </p>
+                )}
+              </div>
+              <div className="w-16 h-16 bg-purple-600 rounded-lg flex items-center justify-center ml-6">
+                <FileText className="h-8 w-8 text-white" />
+              </div>
+            </div>
+          </article>
+        )}
+
+        {/* Article Content Container */}
+        <article className="bg-gray-900 border border-gray-800 rounded-lg p-8 mb-8">
 
           {/* Article Meta */}
-          <div className="flex items-center gap-6 text-sm text-gray-400 mb-6 pb-6 border-b border-gray-800">
+          <div className="flex items-center gap-6 text-sm text-gray-400 mb-6 pb-6 border-b border-gray-800 pt-0">
             <div className="flex items-center gap-2">
               <Calendar className="h-4 w-4" />
               <span>
@@ -224,9 +305,12 @@ export default function BlogDetailPage() {
             <div className="mb-8">
               <h3 className="text-lg font-medium text-white mb-4">記事内容</h3>
               <div className="prose prose-invert max-w-none">
-                <div className="text-gray-300 leading-relaxed whitespace-pre-wrap">
-                  {post.content}
-                </div>
+                <div 
+                  className="text-gray-300 leading-relaxed"
+                  dangerouslySetInnerHTML={{
+                    __html: renderMarkdownToHtml(post.content)
+                  }}
+                />
               </div>
             </div>
           )}
