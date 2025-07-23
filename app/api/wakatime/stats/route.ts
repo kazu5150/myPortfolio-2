@@ -3,7 +3,8 @@ import { NextRequest, NextResponse } from 'next/server'
 const WAKATIME_API_BASE = 'https://wakatime.com/api/v1'
 
 export async function GET(request: NextRequest) {
-  const apiKey = process.env.NEXT_PUBLIC_WAKATIME_API_KEY || process.env.WAKATIME_API_KEY
+  // Try multiple possible environment variable names
+  const apiKey = process.env.WAKATIME_API_KEY || process.env.NEXT_PUBLIC_WAKATIME_API_KEY || process.env.WAKATIME_SECRET
   
   console.log('WakaTime API Debug:', {
     hasApiKey: !!apiKey,

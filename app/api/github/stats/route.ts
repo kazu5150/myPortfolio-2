@@ -86,7 +86,7 @@ export async function GET(request: NextRequest) {
         since.setDate(since.getDate() - 30)
         
         const commitsResponse = await fetch(
-          `${GITHUB_API_BASE}/repos/${username}/${repo.name}/commits?per_page=100&since=${since.toISOString()}`,
+          `${GITHUB_API_BASE}/repos/${username}/${repo.name}/commits?author=${username}&per_page=100&since=${since.toISOString()}`,
           { headers }
         )
         
