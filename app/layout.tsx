@@ -4,6 +4,7 @@ import './globals.css'
 import Sidebar from '@/components/Sidebar'
 import { useState, useEffect } from 'react'
 import { cn } from '@/lib/utils'
+import { AuthProvider } from '@/contexts/AuthContext'
 
 export default function RootLayout({
   children,
@@ -23,13 +24,15 @@ export default function RootLayout({
   return (
     <html lang="ja" suppressHydrationWarning>
       <body suppressHydrationWarning className="bg-black text-white">
-        <Sidebar onCollapsedChange={setIsCollapsed} />
-        <main className={cn(
-          "min-h-screen transition-all duration-300",
-          isCollapsed ? "lg:ml-[80px]" : "lg:ml-[280px]"
-        )}>
-          {children}
-        </main>
+        <AuthProvider>
+          <Sidebar onCollapsedChange={setIsCollapsed} />
+          <main className={cn(
+            "min-h-screen transition-all duration-300",
+            isCollapsed ? "lg:ml-[80px]" : "lg:ml-[280px]"
+          )}>
+            {children}
+          </main>
+        </AuthProvider>
       </body>
     </html>
   )

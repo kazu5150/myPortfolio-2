@@ -3,10 +3,12 @@
 import dynamic from "next/dynamic"
 import { Suspense, useState, useEffect } from "react"
 import Link from "next/link"
-import { Github, Linkedin, Mail, ChevronDown } from "lucide-react"
+import { Github, Linkedin, Mail, ChevronDown, Edit } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useSidebarState } from "@/hooks/useSidebarState"
 import { Chatbot } from "@/components/chatbot"
+import { ProfileEditor, type ProfileData } from "@/components/ProfileEditor"
+import { Button } from "@/components/ui/button"
 
 const Globe = dynamic<{ onColorChange?: (color: { from: string; to: string }) => void }>(
   () => import("@/components/Globe"), 
@@ -18,6 +20,28 @@ export default function Home() {
   const isCollapsed = useSidebarState()
   const [currentColor, setCurrentColor] = useState({ from: "#06b6d4", to: "#3b82f6" }) // cyan-400 to blue-500
   const [targetColor, setTargetColor] = useState({ from: "#06b6d4", to: "#3b82f6" })
+  const [isEditorOpen, setIsEditorOpen] = useState(false)
+  
+  // プロフィールデータの状態管理
+  const [profileData, setProfileData] = useState<ProfileData>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('profileData')
+      if (saved) {
+        try {
+          return JSON.parse(saved)
+        } catch (e) {
+          console.error('Failed to parse saved profile data:', e)
+        }
+      }
+    }
+    return {
+      name: "Matsuzawa",
+      title: ", the AI software engineer",
+      subtitle: "副業から本業へ転身する開発者の成長記録。\nAIとテクノロジーで未来を築く。",
+      ctaText: "Start exploring",
+      ctaLink: "/blog"
+    }
+  })
   
   // Smooth color transition using useEffect
   useEffect(() => {
@@ -52,6 +76,12 @@ export default function Home() {
     return () => clearInterval(interval)
   }, [targetColor])
 
+  // プロフィールデータの保存
+  const handleProfileSave = (newData: ProfileData) => {
+    setProfileData(newData)
+    localStorage.setItem('profileData', JSON.stringify(newData))
+  }
+
   return (
     <div className="relative">
       {/* Hero Section */}
@@ -66,6 +96,19 @@ export default function Home() {
       {/* Main Content - positioned to the left */}
       <div className="relative z-10 w-full max-w-7xl mx-auto px-6 lg:px-16 py-16">
         <div className="space-y-8 max-w-3xl">
+          {/* Edit Button */}
+          <div className="flex justify-end">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsEditorOpen(true)}
+              className="bg-black/20 border-gray-600 text-gray-300 hover:bg-black/40 hover:text-white backdrop-blur-sm"
+            >
+              <Edit className="h-4 w-4 mr-2" />
+              プロフィール編集
+            </Button>
+          </div>
+
           {/* Hero Text */}
           <h1 className="text-4xl md:text-5xl lg:text-7xl font-thin leading-tight tracking-tight">
             <span 
@@ -76,27 +119,23 @@ export default function Home() {
                 backgroundPosition: '0% 50%'
               }}
             >
-              Matsuzawa
+              {profileData.name}
             </span>
-            <span className="text-white">, the AI</span>
-            <br />
-            <span className="text-white">software engineer</span>
+            <span className="text-white">{profileData.title}</span>
           </h1>
 
           {/* Japanese Subtitle */}
-          <p className="text-lg md:text-xl text-gray-400 max-w-2xl font-light">
-            副業から本業へ転身する開発者の成長記録。
-            <br />
-            AIとテクノロジーで未来を築く。
+          <p className="text-lg md:text-xl text-gray-400 max-w-2xl font-light whitespace-pre-line">
+            {profileData.subtitle}
           </p>
 
           {/* CTA Button */}
           <div className="pt-8">
             <Link
-              href="/blog"
+              href={profileData.ctaLink}
               className="inline-flex items-center px-6 md:px-8 py-3 md:py-4 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-full text-base md:text-lg font-medium hover:from-cyan-600 hover:to-blue-700 transition-all duration-200 shadow-lg shadow-cyan-500/25"
             >
-              Start exploring
+              {profileData.ctaText}
             </Link>
           </div>
         </div>
@@ -143,6 +182,14 @@ export default function Home() {
 
       {/* Chatbot */}
       <Chatbot />
+
+      {/* Profile Editor */}
+      <ProfileEditor
+        isOpen={isEditorOpen}
+        onClose={() => setIsEditorOpen(false)}
+        profileData={profileData}
+        onSave={handleProfileSave}
+      />
     </div>
   )
 }

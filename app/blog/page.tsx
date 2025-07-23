@@ -9,6 +9,8 @@ import { PostForm } from "@/components/PostForm"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { AdminActions } from "@/components/AdminActions"
+import { useAuth } from "@/contexts/AuthContext"
 import { toast } from "sonner"
 
 const statusFilters: { value: PostStatus | "ALL"; label: string }[] = [
@@ -23,6 +25,7 @@ export default function BlogPage() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [editingPost, setEditingPost] = useState<any>(null)
   const { posts, loading, error, deletePost, publishPost } = usePosts(true) // Include unpublished posts
+  const { isAdmin } = useAuth()
 
   const filteredPosts = posts.filter(post => {
     return statusFilter === "ALL" || post.status === statusFilter
@@ -109,22 +112,27 @@ export default function BlogPage() {
         <div className="space-y-6 mb-12">
           <div className="flex items-center gap-6">
             <h2 className="text-xl text-cyan-400">記事一覧</h2>
-            <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-              <DialogTrigger asChild>
-                <Button className="ml-auto bg-blue-600 hover:bg-blue-700">
-                  <Plus className="h-5 w-5 mr-2" />
-                  新規記事
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-                <DialogHeader>
-                  <DialogTitle>新規記事作成</DialogTitle>
-                </DialogHeader>
-                <div className="mt-4">
-                  <PostForm onClose={() => setIsCreateDialogOpen(false)} />
-                </div>
-              </DialogContent>
-            </Dialog>
+            <div className="ml-auto flex items-center gap-4">
+              <AdminActions />
+              {isAdmin && (
+                <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button className="bg-blue-600 hover:bg-blue-700">
+                      <Plus className="h-5 w-5 mr-2" />
+                      新規記事
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                    <DialogHeader>
+                      <DialogTitle>新規記事作成</DialogTitle>
+                    </DialogHeader>
+                    <div className="mt-4">
+                      <PostForm onClose={() => setIsCreateDialogOpen(false)} />
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              )}
+            </div>
           </div>
 
           {/* Status Filters */}
@@ -231,46 +239,48 @@ export default function BlogPage() {
                     読む
                   </a>
                   
-                  <div className="flex gap-2">
-                    <Dialog open={editingPost?.id === post.id} onOpenChange={(open) => !open && setEditingPost(null)}>
-                      <DialogTrigger asChild>
+                  {isAdmin && (
+                    <div className="flex gap-2">
+                      <Dialog open={editingPost?.id === post.id} onOpenChange={(open) => !open && setEditingPost(null)}>
+                        <DialogTrigger asChild>
+                          <button 
+                            onClick={() => setEditingPost(post)}
+                            className="flex-1 px-3 py-2 bg-blue-600/20 text-blue-400 rounded-lg hover:bg-blue-600/30 transition-colors flex items-center justify-center gap-1 text-sm"
+                          >
+                            <Edit className="h-3 w-3" />
+                            編集
+                          </button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                          <DialogHeader>
+                            <DialogTitle>記事編集</DialogTitle>
+                          </DialogHeader>
+                          <div className="mt-4">
+                            <PostForm 
+                              post={editingPost} 
+                              onClose={() => setEditingPost(null)} 
+                            />
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                      
+                      {post.status === 'DRAFT' ? (
                         <button 
-                          onClick={() => setEditingPost(post)}
-                          className="flex-1 px-3 py-2 bg-blue-600/20 text-blue-400 rounded-lg hover:bg-blue-600/30 transition-colors flex items-center justify-center gap-1 text-sm"
+                          onClick={() => handlePublish(post.id)}
+                          className="flex-1 px-3 py-2 bg-green-600/20 text-green-400 rounded-lg hover:bg-green-600/30 transition-colors text-sm"
                         >
-                          <Edit className="h-3 w-3" />
-                          編集
+                          公開
                         </button>
-                      </DialogTrigger>
-                      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-                        <DialogHeader>
-                          <DialogTitle>記事編集</DialogTitle>
-                        </DialogHeader>
-                        <div className="mt-4">
-                          <PostForm 
-                            post={editingPost} 
-                            onClose={() => setEditingPost(null)} 
-                          />
-                        </div>
-                      </DialogContent>
-                    </Dialog>
-                    
-                    {post.status === 'DRAFT' ? (
-                      <button 
-                        onClick={() => handlePublish(post.id)}
-                        className="flex-1 px-3 py-2 bg-green-600/20 text-green-400 rounded-lg hover:bg-green-600/30 transition-colors text-sm"
-                      >
-                        公開
-                      </button>
-                    ) : (
-                      <button 
-                        onClick={() => handleDelete(post.id)}
-                        className="flex-1 px-3 py-2 bg-red-600/20 text-red-400 rounded-lg hover:bg-red-600/30 transition-colors text-sm"
-                      >
-                        削除
-                      </button>
-                    )}
-                  </div>
+                      ) : (
+                        <button 
+                          onClick={() => handleDelete(post.id)}
+                          className="flex-1 px-3 py-2 bg-red-600/20 text-red-400 rounded-lg hover:bg-red-600/30 transition-colors text-sm"
+                        >
+                          削除
+                        </button>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             </article>

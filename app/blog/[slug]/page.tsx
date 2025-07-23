@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { PostForm } from "@/components/PostForm"
 import { Badge } from "@/components/ui/badge"
+import { AdminActions } from "@/components/AdminActions"
+import { useAuth } from "@/contexts/AuthContext"
 import { toast } from "sonner"
 
 export default function BlogDetailPage() {
@@ -18,6 +20,7 @@ export default function BlogDetailPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+  const { isAdmin } = useAuth()
 
   useEffect(() => {
     if (params.slug) {
@@ -186,7 +189,7 @@ export default function BlogDetailPage() {
     <div className="min-h-screen p-6 lg:p-12">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
+        <div className="flex items-center justify-between mb-8">
           <Button 
             variant="ghost" 
             onClick={() => router.push('/blog')}
@@ -195,6 +198,7 @@ export default function BlogDetailPage() {
             <ArrowLeft className="h-5 w-5 mr-2" />
             ブログ一覧に戻る
           </Button>
+          <AdminActions />
         </div>
 
         {/* Hero Section with Featured Image */}
@@ -316,34 +320,36 @@ export default function BlogDetailPage() {
           )}
 
           {/* Actions */}
-          <div className="flex gap-4 pt-6 border-t border-gray-800">
-            <Button 
-              variant="outline" 
-              onClick={() => setIsEditDialogOpen(true)}
-              className="border-gray-700 text-gray-300 hover:bg-gray-800"
-            >
-              <Edit3 className="h-4 w-4 mr-2" />
-              編集
-            </Button>
-            
-            {post.status === 'DRAFT' && (
+          {isAdmin && (
+            <div className="flex gap-4 pt-6 border-t border-gray-800">
               <Button 
-                onClick={handlePublish}
-                className="bg-green-600 hover:bg-green-700"
+                variant="outline" 
+                onClick={() => setIsEditDialogOpen(true)}
+                className="border-gray-700 text-gray-300 hover:bg-gray-800"
               >
-                公開する
+                <Edit3 className="h-4 w-4 mr-2" />
+                編集
               </Button>
-            )}
-            
-            <Button 
-              variant="outline" 
-              onClick={handleDelete}
-              className="border-red-700 text-red-400 hover:bg-red-900/20 ml-auto"
-            >
-              <Trash2 className="h-4 w-4 mr-2" />
-              削除
-            </Button>
-          </div>
+              
+              {post.status === 'DRAFT' && (
+                <Button 
+                  onClick={handlePublish}
+                  className="bg-green-600 hover:bg-green-700"
+                >
+                  公開する
+                </Button>
+              )}
+              
+              <Button 
+                variant="outline" 
+                onClick={handleDelete}
+                className="border-red-700 text-red-400 hover:bg-red-900/20 ml-auto"
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                削除
+              </Button>
+            </div>
+          )}
         </article>
 
         {/* Article Info */}
@@ -390,22 +396,24 @@ export default function BlogDetailPage() {
       </div>
 
       {/* Edit Dialog */}
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>記事編集</DialogTitle>
-          </DialogHeader>
-          <div className="mt-4">
-            <PostForm 
-              post={post}
-              onClose={() => {
-                setIsEditDialogOpen(false)
-                fetchPost(post.slug)
-              }} 
-            />
-          </div>
-        </DialogContent>
-      </Dialog>
+      {isAdmin && (
+        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>記事編集</DialogTitle>
+            </DialogHeader>
+            <div className="mt-4">
+              <PostForm 
+                post={post}
+                onClose={() => {
+                  setIsEditDialogOpen(false)
+                  fetchPost(post.slug)
+                }} 
+              />
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   )
 }
