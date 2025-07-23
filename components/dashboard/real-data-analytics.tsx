@@ -165,35 +165,8 @@ export default function RealDataAnalytics() {
   }, [githubData, wakaTimeData])
 
   // Always show the component, but display configuration message when needed
-  const showConfigMessage = !process.env.NEXT_PUBLIC_GITHUB_USERNAME && !process.env.NEXT_PUBLIC_GITHUB_TOKEN
-
-  if (showConfigMessage) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Code className="h-5 w-5" />
-            実際のデータ分析
-          </CardTitle>
-          <CardDescription>
-            GitHub と WakaTime からの実際の開発データ
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center py-8">
-            <p className="text-muted-foreground mb-4">
-              実際のデータを表示するには、環境変数の設定が必要です
-            </p>
-            <div className="space-y-2 text-sm">
-              <p><code>NEXT_PUBLIC_GITHUB_USERNAME</code>: あなたのGitHubユーザー名</p>
-              <p><code>NEXT_PUBLIC_GITHUB_TOKEN</code>: GitHub Personal Access Token</p>
-              <p><code>NEXT_PUBLIC_WAKATIME_API_KEY</code>: WakaTime API Key</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    )
-  }
+  // Remove this check since we want to always show the component
+  // const showConfigMessage = !process.env.NEXT_PUBLIC_GITHUB_USERNAME && !process.env.NEXT_PUBLIC_GITHUB_TOKEN
 
   return (
     <div className="space-y-6">
@@ -214,9 +187,21 @@ export default function RealDataAnalytics() {
       </div>
 
       {error && (
-        <Card className="border-red-200 bg-red-50">
+        <Card className="border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950">
           <CardContent className="pt-6">
-            <p className="text-red-600">エラー: {error}</p>
+            <p className="text-red-600 dark:text-red-400">エラー: {error}</p>
+            <div className="mt-4 text-sm text-gray-600 dark:text-gray-400">
+              <p>デバッグ情報:</p>
+              <pre className="mt-2 p-2 bg-gray-100 dark:bg-gray-800 rounded">
+                {JSON.stringify({
+                  githubDataStatus: githubData ? 'loaded' : 'null',
+                  wakaTimeDataStatus: wakaTimeData ? 'loaded' : 'null',
+                  hasGithubUsername: !!process.env.NEXT_PUBLIC_GITHUB_USERNAME,
+                  hasGithubToken: !!process.env.NEXT_PUBLIC_GITHUB_TOKEN,
+                  hasWakaTimeKey: !!process.env.NEXT_PUBLIC_WAKATIME_API_KEY,
+                }, null, 2)}
+              </pre>
+            </div>
           </CardContent>
         </Card>
       )}
