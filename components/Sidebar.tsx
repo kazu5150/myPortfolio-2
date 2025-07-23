@@ -23,7 +23,7 @@ const navigation = [
     name: "Dashboard",
     href: "/dashboard",
     icon: LayoutDashboard,
-    description: "Admin panel",
+    description: "Analytics & Insights",
   },
   {
     name: "Contact",
