@@ -6,8 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
-import { githubApi } from "@/lib/github-api"
-import { wakaTimeApi } from "@/lib/wakatime-api"
+// Remove direct API imports - we'll use API routes instead
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from "recharts"
 import { format, subDays, parseISO } from "date-fns"
 import { ja } from "date-fns/locale"
@@ -66,16 +65,23 @@ export default function RealDataAnalytics() {
 
   const fetchWakaTimeData = async () => {
     try {
-      const [dailyHours, languageStats, projectStats] = await Promise.all([
-        wakaTimeApi.getDailyCodingHours(30),
-        wakaTimeApi.getLanguageStats('last_30_days'),
-        wakaTimeApi.getProjectStats('last_30_days')
-      ])
+      // Fetch summaries for daily hours
+      const summariesResponse = await fetch('/api/wakatime/stats?endpoint=summaries')
+      const summariesData = summariesResponse.ok ? await summariesResponse.json() : null
+      
+      // Fetch stats for language and project data
+      const statsResponse = await fetch('/api/wakatime/stats?range=last_30_days')
+      const statsData = statsResponse.ok ? await statsResponse.json() : null
+
+      if (!summariesData || !statsData) {
+        console.error('Failed to fetch WakaTime data')
+        return null
+      }
 
       return {
-        dailyHours,
-        languageStats,
-        projectStats
+        dailyHours: summariesData.dailyHours || [],
+        languageStats: statsData.languageStats || [],
+        projectStats: statsData.projectStats || []
       }
     } catch (err) {
       console.error('Failed to fetch WakaTime data:', err)
@@ -196,9 +202,9 @@ export default function RealDataAnalytics() {
                 {JSON.stringify({
                   githubDataStatus: githubData ? 'loaded' : 'null',
                   wakaTimeDataStatus: wakaTimeData ? 'loaded' : 'null',
-                  hasGithubUsername: !!process.env.NEXT_PUBLIC_GITHUB_USERNAME,
-                  hasGithubToken: !!process.env.NEXT_PUBLIC_GITHUB_TOKEN,
-                  hasWakaTimeKey: !!process.env.NEXT_PUBLIC_WAKATIME_API_KEY,
+                  error: error,
+                  // Environment variables are not accessible in client components
+                  note: 'Environment variables are configured on server side'
                 }, null, 2)}
               </pre>
             </div>
