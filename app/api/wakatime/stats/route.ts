@@ -48,7 +48,13 @@ export async function GET(request: NextRequest) {
       )
       
       if (!response.ok) {
-        throw new Error(`WakaTime API error: ${response.status} ${response.statusText}`)
+        const errorText = await response.text()
+        console.error('WakaTime API Error Response:', {
+          status: response.status,
+          statusText: response.statusText,
+          body: errorText
+        })
+        throw new Error(`WakaTime API error: ${response.status} ${response.statusText} - ${errorText}`)
       }
       
       const summaries = await response.json()
@@ -56,10 +62,10 @@ export async function GET(request: NextRequest) {
       // Process daily hours
       const dailyHours = summaries.data?.map((day: any) => ({
         date: day.range.date,
-        hours: day.grand_total.hours + (day.grand_total.minutes / 60),
-        total_seconds: day.grand_total.total_seconds,
-        languages: day.languages,
-        projects: day.projects
+        hours: (day.grand_total?.hours || 0) + ((day.grand_total?.minutes || 0) / 60),
+        total_seconds: day.grand_total?.total_seconds || 0,
+        languages: day.languages || [],
+        projects: day.projects || []
       })) || []
       
       data = { dailyHours }
@@ -77,7 +83,13 @@ export async function GET(request: NextRequest) {
       )
       
       if (!response.ok) {
-        throw new Error(`WakaTime API error: ${response.status} ${response.statusText}`)
+        const errorText = await response.text()
+        console.error('WakaTime API Error Response:', {
+          status: response.status,
+          statusText: response.statusText,
+          body: errorText
+        })
+        throw new Error(`WakaTime API error: ${response.status} ${response.statusText} - ${errorText}`)
       }
       
       const stats = await response.json()
