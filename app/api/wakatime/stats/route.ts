@@ -7,7 +7,8 @@ export async function GET(request: NextRequest) {
   
   console.log('WakaTime API Debug:', {
     hasApiKey: !!apiKey,
-    keyPrefix: apiKey ? apiKey.substring(0, 8) + '...' : 'none'
+    keyPrefix: apiKey ? apiKey.substring(0, 8) + '...' : 'none',
+    keyLength: apiKey ? apiKey.length : 0
   })
   
   if (!apiKey) {
@@ -41,7 +42,7 @@ export async function GET(request: NextRequest) {
         `${WAKATIME_API_BASE}/users/current/summaries?start=${start}&end=${end}`,
         {
           headers: {
-            'Authorization': `Basic ${Buffer.from(apiKey).toString('base64')}`,
+            'Authorization': `Bearer ${apiKey}`,
             'Accept': 'application/json',
             'Content-Type': 'application/json'
           }
@@ -77,7 +78,7 @@ export async function GET(request: NextRequest) {
         `${WAKATIME_API_BASE}/users/current/stats/${range}`,
         {
           headers: {
-            'Authorization': `Basic ${Buffer.from(apiKey).toString('base64')}`,
+            'Authorization': `Bearer ${apiKey}`,
             'Accept': 'application/json',
             'Content-Type': 'application/json'
           }
@@ -109,7 +110,10 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('WakaTime API error:', error)
     return NextResponse.json(
-      { error: 'Failed to fetch WakaTime data' },
+      { 
+        error: 'Failed to fetch WakaTime data',
+        details: error instanceof Error ? error.message : String(error)
+      },
       { status: 500 }
     )
   }
