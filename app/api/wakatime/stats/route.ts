@@ -41,8 +41,9 @@ export async function GET(request: NextRequest) {
         `${WAKATIME_API_BASE}/users/current/summaries?start=${start}&end=${end}`,
         {
           headers: {
-            'Authorization': `Bearer ${apiKey}`,
-            'Accept': 'application/json'
+            'Authorization': `Basic ${Buffer.from(apiKey).toString('base64')}`,
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
           }
         }
       )
@@ -76,8 +77,9 @@ export async function GET(request: NextRequest) {
         `${WAKATIME_API_BASE}/users/current/stats/${range}`,
         {
           headers: {
-            'Authorization': `Bearer ${apiKey}`,
-            'Accept': 'application/json'
+            'Authorization': `Basic ${Buffer.from(apiKey).toString('base64')}`,
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
           }
         }
       )

@@ -67,15 +67,26 @@ export default function RealDataAnalytics() {
     try {
       // Fetch summaries for daily hours
       const summariesResponse = await fetch('/api/wakatime/stats?endpoint=summaries')
+      if (!summariesResponse.ok) {
+        console.error('WakaTime summaries error:', summariesResponse.status)
+      }
       const summariesData = summariesResponse.ok ? await summariesResponse.json() : null
       
       // Fetch stats for language and project data
       const statsResponse = await fetch('/api/wakatime/stats?range=last_30_days')
+      if (!statsResponse.ok) {
+        console.error('WakaTime stats error:', statsResponse.status)
+      }
       const statsData = statsResponse.ok ? await statsResponse.json() : null
 
-      if (!summariesData || !statsData) {
-        console.error('Failed to fetch WakaTime data')
-        return null
+      // Return partial data even if WakaTime fails
+      if (!summariesData && !statsData) {
+        console.warn('WakaTime data not available')
+        return {
+          dailyHours: [],
+          languageStats: [],
+          projectStats: []
+        }
       }
 
       return {
