@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 const GITHUB_API_BASE = 'https://api.github.com'
+// Force new deployment after env var changes
 
 export async function GET(request: NextRequest) {
   const token = process.env.NEXT_PUBLIC_GITHUB_TOKEN || process.env.GITHUB_TOKEN
@@ -9,7 +10,13 @@ export async function GET(request: NextRequest) {
   console.log('GitHub API Debug:', {
     hasToken: !!token,
     tokenPrefix: token ? token.substring(0, 8) + '...' : 'none',
-    username: username || 'none'
+    username: username || 'none',
+    env: {
+      NEXT_PUBLIC_GITHUB_TOKEN: !!process.env.NEXT_PUBLIC_GITHUB_TOKEN,
+      GITHUB_TOKEN: !!process.env.GITHUB_TOKEN,
+      NEXT_PUBLIC_GITHUB_USERNAME: !!process.env.NEXT_PUBLIC_GITHUB_USERNAME,
+      GITHUB_USERNAME: !!process.env.GITHUB_USERNAME
+    }
   })
   
   if (!token || !username) {

@@ -9,7 +9,12 @@ export async function GET(request: NextRequest) {
   console.log('WakaTime API Debug:', {
     hasApiKey: !!apiKey,
     keyPrefix: apiKey ? apiKey.substring(0, 8) + '...' : 'none',
-    keyLength: apiKey ? apiKey.length : 0
+    keyLength: apiKey ? apiKey.length : 0,
+    env: {
+      WAKATIME_API_KEY: !!process.env.WAKATIME_API_KEY,
+      NEXT_PUBLIC_WAKATIME_API_KEY: !!process.env.NEXT_PUBLIC_WAKATIME_API_KEY,
+      WAKATIME_SECRET: !!process.env.WAKATIME_SECRET
+    }
   })
   
   if (!apiKey) {
