@@ -5,7 +5,6 @@ import Sidebar from '@/components/Sidebar'
 import { useState, useEffect } from 'react'
 import { cn } from '@/lib/utils'
 import { AuthProvider } from '@/contexts/AuthContext'
-import ElevenLabsWidget from '@/components/elevenlabs-widget'
 import { Chatbot } from '@/components/chatbot'
 
 export default function RootLayout({
@@ -35,7 +34,6 @@ export default function RootLayout({
             {children}
           </main>
           <Chatbot />
-          <ElevenLabsWidget />
         </AuthProvider>
       </body>
     </html>
