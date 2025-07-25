@@ -36,13 +36,16 @@ const navigation = [
 export default function Sidebar({ onCollapsedChange }: { onCollapsedChange?: (collapsed: boolean) => void }) {
   const pathname = usePathname()
   const [isOpen, setIsOpen] = useState(false)
-  const [isCollapsed, setIsCollapsed] = useState(false)
+  const [isCollapsed, setIsCollapsed] = useState(true)  // デフォルトをtrueに変更
 
   // Save collapsed state to localStorage
   useEffect(() => {
     const saved = localStorage.getItem('sidebarCollapsed')
     if (saved !== null) {
       setIsCollapsed(JSON.parse(saved))
+    } else {
+      // 初回訪問時はデフォルトで折りたたまれた状態にする
+      setIsCollapsed(true)
     }
   }, [])
 

@@ -12,13 +12,16 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  const [isCollapsed, setIsCollapsed] = useState(false)
+  const [isCollapsed, setIsCollapsed] = useState(true)  // デフォルトをtrueに変更
 
   // Load initial state
   useEffect(() => {
     const saved = localStorage.getItem('sidebarCollapsed')
     if (saved !== null) {
       setIsCollapsed(JSON.parse(saved))
+    } else {
+      // 初回訪問時はデフォルトで折りたたまれた状態にする
+      setIsCollapsed(true)
     }
   }, [])
 
