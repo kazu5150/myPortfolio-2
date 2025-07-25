@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic"
 import { Suspense, useState, useEffect } from "react"
 import Link from "next/link"
-import { Github, Linkedin, Mail, ChevronDown, Edit } from "lucide-react"
+import { Github, Mail, ChevronDown, Edit } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useSidebarState } from "@/hooks/useSidebarState"
 import { ProfileEditor, type ProfileData } from "@/components/ProfileEditor"
@@ -155,12 +155,14 @@ export default function Home() {
             <Github className="h-5 w-5" />
           </Link>
           <Link
-            href="https://linkedin.com"
+            href="https://x.com/matsuzawa160611"
             target="_blank"
             rel="noopener noreferrer"
             className="w-10 h-10 lg:w-12 lg:h-12 border border-gray-700 rounded-lg flex items-center justify-center text-gray-400 hover:text-white hover:border-gray-500 transition-colors"
           >
-            <Linkedin className="h-5 w-5" />
+            <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+            </svg>
           </Link>
           <Link
             href="mailto:contact@example.com"
