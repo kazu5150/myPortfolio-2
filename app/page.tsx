@@ -6,9 +6,9 @@ import Link from "next/link"
 import { Github, Linkedin, Mail, ChevronDown, Edit } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useSidebarState } from "@/hooks/useSidebarState"
-import { Chatbot } from "@/components/chatbot"
 import { ProfileEditor, type ProfileData } from "@/components/ProfileEditor"
 import { Button } from "@/components/ui/button"
+import ElevenLabsWidget from "@/components/elevenlabs-widget"
 
 const Globe = dynamic<{ onColorChange?: (color: { from: string; to: string }) => void }>(
   () => import("@/components/Globe"), 
@@ -180,8 +180,8 @@ export default function Home() {
       {/* About Me Section */}
       <AboutMe />
 
-      {/* Chatbot */}
-      <Chatbot />
+      {/* ElevenLabs Widget - Homepage only */}
+      <ElevenLabsWidget />
 
       {/* Profile Editor */}
       <ProfileEditor
