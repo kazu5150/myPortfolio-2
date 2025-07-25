@@ -5,7 +5,7 @@ import Sidebar from '@/components/Sidebar'
 import { useState, useEffect } from 'react'
 import { cn } from '@/lib/utils'
 import { AuthProvider } from '@/contexts/AuthContext'
-import { Chatbot } from '@/components/chatbot'
+import { ChatbotWrapper } from '@/components/chatbot-wrapper'
 
 export default function RootLayout({
   children,
@@ -33,7 +33,7 @@ export default function RootLayout({
           )}>
             {children}
           </main>
-          <Chatbot />
+          <ChatbotWrapper />
         </AuthProvider>
       </body>
     </html>
