@@ -37,7 +37,7 @@ export default function Home() {
     return {
       name: "Matsuzawa",
       title: ", the AI software engineer",
-      subtitle: "1%の挑戦。 99%失敗する。\nも1%の可能性に賭けて挑戦し続けるのだ！\nAIとテクノロジーで未来を築こう!",
+      subtitle: "1%の挑戦。 99%失敗する。\n1%の可能性に賭けて挑戦し続けるのだ！\nAIとテクノロジーで未来を築こう!",
       ctaText: "Start exploring",
       ctaLink: "/blog"
     }
