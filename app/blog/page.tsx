@@ -160,34 +160,35 @@ export default function BlogPage() {
         {/* Posts Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {filteredPosts.map(post => (
-            <article key={post.id} className="bg-gray-900 border border-gray-800 rounded-lg overflow-hidden hover:border-gray-700 transition-colors">
+            <article key={post.id} className="bg-gray-900 border border-gray-800 rounded-lg overflow-hidden hover:border-gray-700 transition-colors group">
+              {/* Title and Status - Above Image */}
+              <div className="p-6 pb-4">
+                <div className="flex items-start justify-between gap-3 mb-3">
+                  <h2 className="text-xl font-semibold text-white hover:text-cyan-400 transition-colors flex-1">
+                    {post.title}
+                  </h2>
+                  <Badge className={cn("text-xs shrink-0", getStatusColor(post.status))}>
+                    {getStatusLabel(post.status)}
+                  </Badge>
+                </div>
+              </div>
+
               {/* Featured Image */}
               {post.featured_image_url ? (
-                <div className="w-full h-48 overflow-hidden">
+                <div className="w-full h-48 overflow-hidden -mt-2">
                   <img
                     src={post.featured_image_url}
                     alt={post.title}
-                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                 </div>
               ) : (
-                <div className="w-full h-48 bg-gradient-to-br from-purple-600/20 to-blue-600/20 flex items-center justify-center">
+                <div className="w-full h-48 bg-gradient-to-br from-purple-600/20 to-blue-600/20 flex items-center justify-center -mt-2">
                   <FileText className="h-12 w-12 text-gray-400" />
                 </div>
               )}
 
-              <div className="p-6">
-                {/* Status Badge */}
-                <div className="flex items-center justify-between mb-4">
-                  <Badge className={cn("text-xs", getStatusColor(post.status))}>
-                    {getStatusLabel(post.status)}
-                  </Badge>
-                </div>
-
-                {/* Title */}
-                <h2 className="text-lg font-medium text-white hover:text-cyan-400 transition-colors cursor-pointer mb-3 line-clamp-2">
-                  {post.title}
-                </h2>
+              <div className="p-6 pt-4">
                 
                 {/* Excerpt */}
                 {post.excerpt && (
