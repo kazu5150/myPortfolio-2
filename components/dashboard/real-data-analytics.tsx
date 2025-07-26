@@ -83,14 +83,14 @@ export default function RealDataAnalytics() {
       // Fetch summaries for daily hours
       const summariesResponse = await fetch('/api/wakatime/stats?endpoint=summaries')
       if (!summariesResponse.ok) {
-        console.error('WakaTime summaries error:', summariesResponse.status)
+        console.warn('WakaTime summaries API returned error, using fallback data')
       }
       const summariesData = summariesResponse.ok ? await summariesResponse.json() : null
       
       // Fetch stats for language and project data
       const statsResponse = await fetch('/api/wakatime/stats?range=last_30_days')
       if (!statsResponse.ok) {
-        console.error('WakaTime stats error:', statsResponse.status)
+        console.warn('WakaTime stats API returned error, using fallback data')
       }
       const statsData = statsResponse.ok ? await statsResponse.json() : null
 
