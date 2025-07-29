@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Home, BookOpen, LayoutDashboard, Mail, Code2, Menu, X, ChevronLeft, ChevronRight } from "lucide-react"
+import { Home, BookOpen, LayoutDashboard, Mail, Code2, Menu, X, ChevronLeft, ChevronRight, Sparkles } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useState, useEffect } from "react"
 
@@ -18,6 +18,12 @@ const navigation = [
     href: "/blog",
     icon: BookOpen,
     description: "Technical articles",
+  },
+  {
+    name: "AI Playground",
+    href: "/ai-playground",
+    icon: Sparkles,
+    description: "AI experiments",
   },
   {
     name: "Dashboard",
