@@ -82,7 +82,7 @@ export default function NasaExplorerPage() {
   const minDate = '1995-06-16'
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900/20 to-gray-900">
+    <div className="min-h-screen bg-black">
       {/* Header */}
       <header className="relative py-12 px-4">
         <div className="max-w-7xl mx-auto">
