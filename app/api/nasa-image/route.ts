@@ -12,16 +12,46 @@ export async function GET(request: NextRequest) {
       )
     }
 
+    // URLパラメータから日付を取得
+    const { searchParams } = new URL(request.url)
+    const date = searchParams.get('date')
+    
+    // 日付のバリデーション
+    if (date) {
+      const dateRegex = /^\d{4}-\d{2}-\d{2}$/
+      if (!dateRegex.test(date)) {
+        return NextResponse.json(
+          { error: '日付は YYYY-MM-DD 形式で指定してください' },
+          { status: 400 }
+        )
+      }
+      
+      // 日付範囲の確認（NASA APOD開始日: 1995-06-16）
+      const minDate = new Date('1995-06-16')
+      const maxDate = new Date()
+      const requestDate = new Date(date)
+      
+      if (requestDate < minDate || requestDate > maxDate) {
+        return NextResponse.json(
+          { error: '日付は1995年6月16日から今日までの範囲で指定してください' },
+          { status: 400 }
+        )
+      }
+    }
+
     // n8n webhookを呼び出し
+    const requestBody = {
+      trigger: 'get_nasa_image',
+      timestamp: new Date().toISOString(),
+      ...(date && { date: date }) // 日付が指定されている場合のみ追加
+    }
+
     const response = await fetch(n8nWebhookUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        trigger: 'get_nasa_image',
-        timestamp: new Date().toISOString(),
-      }),
+      body: JSON.stringify(requestBody),
     })
 
     if (!response.ok) {
