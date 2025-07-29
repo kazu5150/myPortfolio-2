@@ -61,17 +61,17 @@ export async function GET(request: NextRequest) {
     const data = await response.json()
 
     // レスポンスデータの検証
-    if (!data.title || !data.imageUrl || !data.explanation) {
+    if (!data.title || !data.imageUrl) {
       throw new Error('無効なレスポンスデータ')
     }
 
     // クライアントに返すデータの整形
     const nasaImageData = {
       title: data.title,
-      description: data.description || data.explanation,
-      imageUrl: data.imageUrl || data.url,
+      description: data.explanation || data.description || 'NASA公式説明が利用できません',
+      imageUrl: data.imageUrl || data.url || data.hdImageUrl,
       date: data.date || new Date().toISOString().split('T')[0],
-      explanation: data.explanation || data.aiExplanation || 'AI解説が利用できません',
+      explanation: data.aiAnalysis?.content || data.explanation || 'AI解説が利用できません',
     }
 
     return NextResponse.json(nasaImageData)

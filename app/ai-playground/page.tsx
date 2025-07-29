@@ -70,11 +70,13 @@ export default function AIPlaygroundPage() {
             <span className="text-sm text-purple-300">AI実験室</span>
           </div>
           
-          <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 tracking-tight">
-            AI Playground
+          <h1 className="text-5xl md:text-7xl font-thin mb-6 tracking-tight">
+            <span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+              AI Playground
+            </span>
           </h1>
           
-          <p className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto mb-8 leading-relaxed">
+          <p className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto mb-8 leading-relaxed font-light">
             最新のAI技術を活用した実験的なプロジェクトを体験できる場所
           </p>
           
@@ -117,7 +119,7 @@ export default function AIPlaygroundPage() {
                     {experiment.icon}
                   </div>
 
-                  <h3 className="text-xl font-semibold text-white mb-2">
+                  <h3 className="text-xl font-light text-white mb-2">
                     {experiment.title}
                   </h3>
 
@@ -154,7 +156,7 @@ export default function AIPlaygroundPage() {
       {/* Features Section */}
       <section className="py-20 px-4 border-t border-gray-800">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl font-bold text-white text-center mb-12">
+          <h2 className="text-3xl font-thin text-white text-center mb-12">
             なぜAI Playgroundなのか？
           </h2>
           
@@ -163,7 +165,7 @@ export default function AIPlaygroundPage() {
               <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-purple-500/20 text-purple-400 mb-4">
                 <Sparkles className="w-6 h-6" />
               </div>
-              <h3 className="text-lg font-semibold text-white mb-2">最新技術</h3>
+              <h3 className="text-lg font-light text-white mb-2">最新技術</h3>
               <p className="text-gray-400">常に最新のAI技術を試すことができます</p>
             </div>
             
@@ -171,7 +173,7 @@ export default function AIPlaygroundPage() {
               <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-blue-500/20 text-blue-400 mb-4">
                 <Zap className="w-6 h-6" />
               </div>
-              <h3 className="text-lg font-semibold text-white mb-2">高速実行</h3>
+              <h3 className="text-lg font-light text-white mb-2">高速実行</h3>
               <p className="text-gray-400">最適化されたモデルで高速な応答を実現</p>
             </div>
             
@@ -179,7 +181,7 @@ export default function AIPlaygroundPage() {
               <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-green-500/20 text-green-400 mb-4">
                 <Brain className="w-6 h-6" />
               </div>
-              <h3 className="text-lg font-semibold text-white mb-2">学習機会</h3>
+              <h3 className="text-lg font-light text-white mb-2">学習機会</h3>
               <p className="text-gray-400">AIの仕組みを実際に体験しながら学べます</p>
             </div>
           </div>

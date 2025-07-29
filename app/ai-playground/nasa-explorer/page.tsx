@@ -78,11 +78,11 @@ export default function NasaExplorerPage() {
               <span className="text-sm text-blue-300">NASA画像エクスプローラー</span>
             </div>
             
-            <h1 className="text-4xl md:text-6xl font-bold text-white mb-4 tracking-tight">
+            <h1 className="text-4xl md:text-6xl font-thin text-white mb-4 tracking-tight">
               宇宙の神秘を探る
             </h1>
             
-            <p className="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto mb-8">
+            <p className="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto mb-8 font-light">
               NASAの宇宙画像をAIが詳しく解説します
             </p>
           </div>
@@ -106,7 +106,7 @@ export default function NasaExplorerPage() {
                 <div className="space-y-4">
                   <div className="flex items-center gap-2 mb-3">
                     <Clock className="w-5 h-5 text-blue-400" />
-                    <h3 className="text-lg font-semibold text-white">今日の画像</h3>
+                    <h3 className="text-lg font-light text-white">今日の画像</h3>
                   </div>
                   <button
                     onClick={handleTodayFetch}
@@ -131,7 +131,7 @@ export default function NasaExplorerPage() {
                 <div className="space-y-4">
                   <div className="flex items-center gap-2 mb-3">
                     <Calendar className="w-5 h-5 text-purple-400" />
-                    <h3 className="text-lg font-semibold text-white">日付を指定</h3>
+                    <h3 className="text-lg font-light text-white">日付を指定</h3>
                   </div>
                   <div className="space-y-3">
                     <input
@@ -202,7 +202,7 @@ export default function NasaExplorerPage() {
                   {/* Content */}
                   <div className="space-y-6">
                     <div>
-                      <h2 className="text-2xl font-bold text-white mb-2">
+                      <h2 className="text-2xl font-thin text-white mb-2">
                         {imageData.title}
                       </h2>
                       <p className="text-sm text-gray-400">{imageData.date}</p>
@@ -210,7 +210,7 @@ export default function NasaExplorerPage() {
 
                     <div className="space-y-4">
                       <div>
-                        <h3 className="text-lg font-semibold text-white mb-2 flex items-center gap-2">
+                        <h3 className="text-lg font-light text-white mb-2 flex items-center gap-2">
                           <Sparkles className="w-5 h-5 text-blue-400" />
                           AI解説
                         </h3>
@@ -220,7 +220,7 @@ export default function NasaExplorerPage() {
                       </div>
 
                       <div>
-                        <h3 className="text-lg font-semibold text-white mb-2">
+                        <h3 className="text-lg font-light text-white mb-2">
                           NASA公式説明
                         </h3>
                         <p className="text-gray-400 text-sm leading-relaxed">
@@ -239,7 +239,7 @@ export default function NasaExplorerPage() {
             <div className="max-w-2xl mx-auto text-center">
               <div className="bg-gray-800/30 backdrop-blur-sm rounded-xl p-8 border border-gray-700">
                 <Image className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-                <h3 className="text-xl font-semibold text-white mb-2">
+                <h3 className="text-xl font-thin text-white mb-2">
                   宇宙の美しさを発見しよう
                 </h3>
                 <p className="text-gray-400 mb-6">
