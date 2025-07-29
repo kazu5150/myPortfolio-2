@@ -1,5 +1,6 @@
-import { Sparkles, Brain, Wand2, Cpu, Zap, Bot } from 'lucide-react'
+import { Sparkles, Brain, Wand2, Cpu, Zap, Bot, Image } from 'lucide-react'
 import { Metadata } from 'next'
+import Link from 'next/link'
 
 export const metadata: Metadata = {
   title: 'AI Playground - AI実験室',
@@ -10,6 +11,15 @@ export default function AIPlaygroundPage() {
   const experiments = [
     {
       id: 1,
+      title: 'NASA画像エクスプローラー',
+      description: 'NASAの宇宙画像をAIが詳しく解説',
+      icon: <Image className="w-6 h-6" />,
+      status: 'available',
+      gradient: 'from-blue-500 to-cyan-500',
+      href: '/ai-playground/nasa-explorer',
+    },
+    {
+      id: 2,
       title: 'テキスト生成AI',
       description: 'GPTモデルを使用した創造的なテキスト生成',
       icon: <Brain className="w-6 h-6" />,
@@ -17,42 +27,34 @@ export default function AIPlaygroundPage() {
       gradient: 'from-purple-500 to-pink-500',
     },
     {
-      id: 2,
+      id: 3,
       title: '画像生成AI',
       description: 'プロンプトから画像を生成する実験',
       icon: <Wand2 className="w-6 h-6" />,
-      status: 'coming-soon',
-      gradient: 'from-blue-500 to-cyan-500',
-    },
-    {
-      id: 3,
-      title: 'コード生成アシスタント',
-      description: 'AIを使用したコード補完と生成',
-      icon: <Cpu className="w-6 h-6" />,
       status: 'coming-soon',
       gradient: 'from-green-500 to-emerald-500',
     },
     {
       id: 4,
-      title: 'リアルタイム翻訳',
-      description: '多言語間のリアルタイム翻訳システム',
-      icon: <Zap className="w-6 h-6" />,
+      title: 'コード生成アシスタント',
+      description: 'AIを使用したコード補完と生成',
+      icon: <Cpu className="w-6 h-6" />,
       status: 'coming-soon',
       gradient: 'from-orange-500 to-red-500',
     },
     {
       id: 5,
-      title: 'AIチャットボット',
-      description: 'カスタマイズ可能な対話型AI',
-      icon: <Bot className="w-6 h-6" />,
+      title: 'リアルタイム翻訳',
+      description: '多言語間のリアルタイム翻訳システム',
+      icon: <Zap className="w-6 h-6" />,
       status: 'coming-soon',
       gradient: 'from-indigo-500 to-purple-500',
     },
     {
       id: 6,
-      title: 'データ分析AI',
-      description: 'データの可視化と洞察の自動生成',
-      icon: <Sparkles className="w-6 h-6" />,
+      title: 'AIチャットボット',
+      description: 'カスタマイズ可能な対話型AI',
+      icon: <Bot className="w-6 h-6" />,
       status: 'coming-soon',
       gradient: 'from-pink-500 to-rose-500',
     },
@@ -97,11 +99,14 @@ export default function AIPlaygroundPage() {
       <section className="py-20 px-4">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {experiments.map((experiment) => (
-              <div
-                key={experiment.id}
-                className="group relative bg-gray-800/50 backdrop-blur-sm rounded-2xl p-6 border border-gray-700 hover:border-gray-600 transition-all duration-300 cursor-pointer"
-              >
+            {experiments.map((experiment) => {
+              const ExperimentCard = experiment.href ? Link : 'div'
+              return (
+                <ExperimentCard
+                  key={experiment.id}
+                  href={experiment.href || '#'}
+                  className="group relative bg-gray-800/50 backdrop-blur-sm rounded-2xl p-6 border border-gray-700 hover:border-gray-600 transition-all duration-300 cursor-pointer block"
+                >
                 {/* Gradient overlay on hover */}
                 <div
                   className={`absolute inset-0 bg-gradient-to-br ${experiment.gradient} opacity-0 group-hover:opacity-10 rounded-2xl transition-opacity duration-300`}
@@ -121,20 +126,27 @@ export default function AIPlaygroundPage() {
                   </p>
 
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-500 bg-gray-800 px-3 py-1 rounded-full">
+                    <span className={`text-sm px-3 py-1 rounded-full ${
+                      experiment.status === 'available' 
+                        ? 'bg-green-500/20 text-green-400' 
+                        : 'bg-gray-800 text-gray-500'
+                    }`}>
                       {experiment.status === 'coming-soon' ? '近日公開' : '利用可能'}
                     </span>
                     
                     <div className="flex items-center gap-2 text-gray-400 group-hover:text-white transition-colors">
-                      <span className="text-sm">詳細を見る</span>
+                      <span className="text-sm">
+                        {experiment.status === 'available' ? '体験する' : '詳細を見る'}
+                      </span>
                       <svg className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                       </svg>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              </ExperimentCard>
+              )
+            })}
           </div>
         </div>
       </section>
