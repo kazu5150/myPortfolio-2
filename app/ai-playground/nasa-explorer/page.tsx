@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Metadata } from 'next'
-import { Sparkles, Image, Loader2, RefreshCw, ArrowLeft, Calendar, Clock } from 'lucide-react'
+import { Sparkles, Image, Loader2, RefreshCw, ArrowLeft, Calendar, Clock, X } from 'lucide-react'
 import Link from 'next/link'
 
 interface NasaImageData {
@@ -19,6 +19,7 @@ export default function NasaExplorerPage() {
   const [error, setError] = useState<string | null>(null)
   const [selectedDate, setSelectedDate] = useState<string>('')
   const [fetchMode, setFetchMode] = useState<'today' | 'date'>('today')
+  const [showModal, setShowModal] = useState(false)
 
   const fetchNasaImage = async (date?: string) => {
     setIsLoading(true)
@@ -53,6 +54,27 @@ export default function NasaExplorerPage() {
     setFetchMode('date')
     fetchNasaImage(selectedDate)
   }
+
+  // Handle ESC key to close modal
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setShowModal(false)
+      }
+    }
+    
+    if (showModal) {
+      document.addEventListener('keydown', handleEsc)
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = 'unset'
+    }
+    
+    return () => {
+      document.removeEventListener('keydown', handleEsc)
+      document.body.style.overflow = 'unset'
+    }
+  }, [showModal])
 
   // Today's date for max date limit
   const today = new Date().toISOString().split('T')[0]
@@ -189,14 +211,23 @@ export default function NasaExplorerPage() {
                 <div className="grid lg:grid-cols-2 gap-8">
                   {/* Image */}
                   <div className="relative group">
-                    <div className="aspect-video w-full overflow-hidden rounded-xl">
+                    <div 
+                      className="aspect-video w-full overflow-hidden rounded-xl cursor-pointer"
+                      onClick={() => setShowModal(true)}
+                    >
                       <img
                         src={imageData.imageUrl}
                         alt={imageData.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       />
                     </div>
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="bg-black/50 backdrop-blur-sm px-4 py-2 rounded-lg text-white text-sm">
+                          クリックして拡大
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
                   {/* Content */}
@@ -260,6 +291,33 @@ export default function NasaExplorerPage() {
           )}
         </div>
       </main>
+
+      {/* Image Modal */}
+      {showModal && imageData && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+          onClick={() => setShowModal(false)}
+        >
+          <div className="relative max-w-[90vw] max-h-[90vh]">
+            <button
+              onClick={() => setShowModal(false)}
+              className="absolute -top-12 right-0 p-2 text-white hover:text-gray-300 transition-colors"
+            >
+              <X className="w-6 h-6" />
+            </button>
+            <img
+              src={imageData.imageUrl}
+              alt={imageData.title}
+              className="max-w-full max-h-[90vh] object-contain rounded-lg"
+              onClick={(e) => e.stopPropagation()}
+            />
+            <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent rounded-b-lg">
+              <h3 className="text-white text-lg font-light">{imageData.title}</h3>
+              <p className="text-gray-300 text-sm">{imageData.date}</p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
