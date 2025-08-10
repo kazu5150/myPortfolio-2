@@ -1,4 +1,4 @@
-import { Sparkles, Brain, Wand2, Cpu, Zap, Bot, Image } from 'lucide-react'
+import { Sparkles, Brain, Wand2, Cpu, Zap, Bot, Image, Twitter } from 'lucide-react'
 import { Metadata } from 'next'
 import Link from 'next/link'
 
@@ -20,6 +20,15 @@ export default function AIPlaygroundPage() {
     },
     {
       id: 2,
+      title: 'Twitter検索エクスプローラー',
+      description: 'Twitter APIでリアルタイムなツイートを検索・分析',
+      icon: <Twitter className="w-6 h-6" />,
+      status: 'available',
+      gradient: 'from-blue-400 to-blue-600',
+      href: '/ai-playground/twitter-explorer',
+    },
+    {
+      id: 3,
       title: 'テキスト生成AI',
       description: 'GPTモデルを使用した創造的なテキスト生成',
       icon: <Brain className="w-6 h-6" />,
@@ -27,7 +36,7 @@ export default function AIPlaygroundPage() {
       gradient: 'from-purple-500 to-pink-500',
     },
     {
-      id: 3,
+      id: 4,
       title: '画像生成AI',
       description: 'プロンプトから画像を生成する実験',
       icon: <Wand2 className="w-6 h-6" />,
@@ -35,7 +44,7 @@ export default function AIPlaygroundPage() {
       gradient: 'from-green-500 to-emerald-500',
     },
     {
-      id: 4,
+      id: 5,
       title: 'コード生成アシスタント',
       description: 'AIを使用したコード補完と生成',
       icon: <Cpu className="w-6 h-6" />,
@@ -43,7 +52,7 @@ export default function AIPlaygroundPage() {
       gradient: 'from-orange-500 to-red-500',
     },
     {
-      id: 5,
+      id: 6,
       title: 'リアルタイム翻訳',
       description: '多言語間のリアルタイム翻訳システム',
       icon: <Zap className="w-6 h-6" />,
@@ -51,7 +60,7 @@ export default function AIPlaygroundPage() {
       gradient: 'from-indigo-500 to-purple-500',
     },
     {
-      id: 6,
+      id: 7,
       title: 'AIチャットボット',
       description: 'カスタマイズ可能な対話型AI',
       icon: <Bot className="w-6 h-6" />,
