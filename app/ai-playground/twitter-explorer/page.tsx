@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Twitter, Search, Loader2, ArrowLeft, MessageCircle, Heart, Repeat, ExternalLink, Filter } from 'lucide-react'
+import { Twitter, Search, Loader2, ArrowLeft, MessageCircle, Heart, Repeat, ExternalLink, Filter, User } from 'lucide-react'
 import Link from 'next/link'
 
 interface TwitterSearchData {
@@ -46,6 +46,7 @@ export default function TwitterExplorerPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [query, setQuery] = useState('AI')
+  const [fromAccount, setFromAccount] = useState('')
   const [limit, setLimit] = useState(50)
   const [sort, setSort] = useState<'recency' | 'relevance'>('recency')
   const [lang, setLang] = useState('ja')
@@ -62,6 +63,7 @@ export default function TwitterExplorerPage() {
     try {
       const params = new URLSearchParams({
         query: query.trim(),
+        fromAccount: fromAccount.trim(),
         limit: limit.toString(),
         sort,
         lang
@@ -199,21 +201,48 @@ export default function TwitterExplorerPage() {
           <div className="max-w-4xl mx-auto mb-12">
             <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-6 border border-gray-700">
               <div className="space-y-6">
-                {/* Search Input */}
-                <div className="space-y-3">
-                  <label className="flex items-center gap-2 text-lg font-light text-white">
-                    <Search className="w-5 h-5 text-blue-400" />
-                    検索キーワード
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="text"
-                      value={query}
-                      onChange={(e) => setQuery(e.target.value)}
-                      onKeyPress={handleKeyPress}
-                      placeholder="AIやChatGPTなどのキーワードを入力..."
-                      className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder:text-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"
-                    />
+                {/* Search Inputs */}
+                <div className="grid md:grid-cols-2 gap-6">
+                  {/* Keyword Search */}
+                  <div className="space-y-3">
+                    <label className="flex items-center gap-2 text-lg font-light text-white">
+                      <Search className="w-5 h-5 text-blue-400" />
+                      検索キーワード
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={query}
+                        onChange={(e) => setQuery(e.target.value)}
+                        onKeyPress={handleKeyPress}
+                        placeholder="AIやChatGPTなどのキーワードを入力..."
+                        className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder:text-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Account Search */}
+                  <div className="space-y-3">
+                    <label className="flex items-center gap-2 text-lg font-light text-white">
+                      <User className="w-5 h-5 text-purple-400" />
+                      特定アカウント <span className="text-sm text-gray-400 font-normal">(オプション)</span>
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={fromAccount}
+                        onChange={(e) => setFromAccount(e.target.value)}
+                        onKeyPress={handleKeyPress}
+                        placeholder="@なしでユーザー名を入力 (例: OpenAI)"
+                        className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder:text-gray-400 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 outline-none transition-colors"
+                      />
+                      <div className="absolute inset-y-0 right-3 flex items-center text-gray-400 text-sm">
+                        @{fromAccount || 'username'}
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-500">
+                      指定したアカウントからのツイートのみを検索します
+                    </p>
                   </div>
                 </div>
 
@@ -306,6 +335,11 @@ export default function TwitterExplorerPage() {
                     <h3 className="text-lg font-light text-white">
                       「{searchData.query}」の検索結果
                     </h3>
+                    {fromAccount && (
+                      <p className="text-sm text-purple-300">
+                        @{fromAccount} からのツイートのみ表示
+                      </p>
+                    )}
                     {searchData.results.meta && (
                       <p className="text-sm text-gray-400">
                         {searchData.results.meta.result_count || searchData.results.tweets?.length || 0} 件のツイートを取得
@@ -501,7 +535,7 @@ export default function TwitterExplorerPage() {
                   Twitter上の声を探してみよう
                 </h3>
                 <p className="text-gray-400 mb-6">
-                  キーワードを入力してTwitter上の最新の会話を探索しましょう。
+                  キーワードや特定のアカウントを指定してTwitter上の最新の会話を探索しましょう。
                 </p>
                 <div className="flex items-center justify-center gap-4 text-sm text-gray-500">
                   <div className="flex items-center gap-2">
@@ -510,7 +544,7 @@ export default function TwitterExplorerPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-purple-400"></div>
-                    <span>高度なフィルタリング</span>
+                    <span>アカウント指定検索</span>
                   </div>
                 </div>
               </div>

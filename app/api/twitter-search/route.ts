@@ -17,6 +17,7 @@ export async function GET(request: NextRequest) {
     // URLパラメータからクエリパラメータを取得
     const { searchParams } = new URL(request.url)
     const query = searchParams.get('query') || 'AI'
+    const fromAccount = searchParams.get('fromAccount') || ''
     const lang = searchParams.get('lang') || 'ja'
     const limit = parseInt(searchParams.get('limit') || '50')
     const sort = searchParams.get('sort') || 'recency'
@@ -37,7 +38,25 @@ export async function GET(request: NextRequest) {
     }
 
     // Twitter APIに送信するクエリを構築
-    const searchQuery = `${query} lang:${lang}`
+    function buildQuery(keywords: string, fromAccount: string, lang: string): string {
+      let searchQuery = keywords
+      
+      // アカウント指定がある場合は from:username を追加
+      if (fromAccount.trim()) {
+        // @マークを除去してクリーンアップ
+        const cleanUsername = fromAccount.replace(/^@+/, '').trim()
+        if (cleanUsername) {
+          searchQuery += ` from:${cleanUsername}`
+        }
+      }
+      
+      // 言語指定を追加
+      searchQuery += ` lang:${lang}`
+      
+      return searchQuery
+    }
+    
+    const searchQuery = buildQuery(query, fromAccount, lang)
     
     // リクエストパラメータを構築
     const params = new URLSearchParams({
@@ -125,11 +144,12 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { query = 'AI', lang = 'ja', limit = 50, sort = 'recency' } = body
+    const { query = 'AI', fromAccount = '', lang = 'ja', limit = 50, sort = 'recency' } = body
     
     // クエリパラメータを作成してGETメソッドに委譲
     const url = new URL(request.url)
     url.searchParams.set('query', query)
+    url.searchParams.set('fromAccount', fromAccount)
     url.searchParams.set('lang', lang)
     url.searchParams.set('limit', limit.toString())
     url.searchParams.set('sort', sort)
