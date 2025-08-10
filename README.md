@@ -8,6 +8,7 @@ Next.js 15で構築されたモダンなポートフォリオ兼ブログサイ�
 - **3Dグローブビジュアライゼーション**: 動的なカラーサイクリングを備えたインタラクティブなThree.js製グローブ
 - **ブログシステム**: Markdownエディタ、画像アップロード、公開ワークフローを備えたフル機能のブログ
 - **AIチャットボット**: サイト全体に統合されたOpenAI搭載のチャットアシスタント
+- **AI Playground**: 実験的なAI機能を体験できるインタラクティブなプレイグラウンド
 - **ダークテーマ**: グラデーションアクセントで最適化されたダークテーマデザイン
 - **レスポンシブデザイン**: すべてのデバイスに対応したモバイルファーストアプローチ
 
@@ -18,6 +19,15 @@ Next.js 15で構築されたモダンなポートフォリオ兼ブログサイ�
 - **ヒーロー画像**: ヒーローセクション付きのブログ記事用アイキャッチ画像
 - **SEO対応**: スラッグベースのルーティングとメタデータサポート
 
+### AI Playground機能
+- **NASA画像エクスプローラー**: NASAの宇宙画像をAIが詳しく解説する機能
+- **Twitter検索エクスプローラー**: リアルタイムなTwitter検索と分析機能
+  - キーワード検索とアカウント指定検索
+  - エンゲージメント指標（いいね、リツイート、返信数）表示
+  - 実際のTwitterページへの直接リンク
+  - 多言語対応（日本語、英語など）
+  - 取得件数とソート順の柔軟な設定
+
 ## 🛠 技術スタック
 
 - **フレームワーク**: [Next.js 15](https://nextjs.org/) (App Router)
@@ -27,6 +37,7 @@ Next.js 15で構築されたモダンなポートフォリオ兼ブログサイ�
 - **UIコンポーネント**: [shadcn/ui](https://ui.shadcn.com/)
 - **3Dグラフィックス**: [Three.js](https://threejs.org/)
 - **AI統合**: [OpenAI API](https://openai.com/)
+- **Twitter API**: [twitterapi.io](https://twitterapi.io/) (Twitter Advanced Search API)
 - **フォーム処理**: [React Hook Form](https://react-hook-form.com/) + [Zod](https://zod.dev/)
 
 ## 📦 インストール
@@ -52,12 +63,14 @@ cp .env.example .env.local
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 OPENAI_API_KEY=your_openai_api_key
+TWAPI_KEY=your_twitter_api_key
 ```
 
-4. Supabaseをセットアップ:
+4. 外部サービスをセットアップ:
    - [supabase.com](https://supabase.com)で新しいプロジェクトを作成
    - データベーススキーマを実行（データベースセットアップセクションを参照）
    - `project-images`という名前のストレージバケットをパブリックアクセスで作成
+   - [twitterapi.io](https://twitterapi.io/)でTwitter API keyを取得（Twitter検索機能用）
 
 5. 開発サーバーを起動:
 ```bash
@@ -118,6 +131,7 @@ CREATE TRIGGER update_posts_updated_at
 ```
 sophisticated-landing/
 ├── app/                    # Next.js App Routerページ
+│   ├── ai-playground/     # AI実験機能
 │   ├── blog/              # ブログページ
 │   ├── dashboard/         # 管理ダッシュボード
 │   └── page.tsx           # ホームページ
@@ -145,6 +159,14 @@ sophisticated-landing/
 ### AIチャットボット
 すべてのページで利用可能なフローティングチャットボタン。OpenAIのGPT-3.5-turboモデルを使用。
 
+### AI Playground
+実験的なAI機能を体験できるインタラクティブな環境:
+- **NASA画像エクスプローラー**: 日付指定でNASAの宇宙画像を取得し、AIによる詳細解説を表示
+- **Twitter検索エクスプローラー**: [twitterapi.io](https://twitterapi.io/)を利用したリアルタイムTwitter検索
+  - キーワード検索 + アカウント指定検索
+  - `from:username` 構文による特定アカウントの投稿検索
+  - エンゲージメント指標とTwitterページへの直接リンク
+
 ## 📝 利用可能なスクリプト
 
 ```bash
@@ -161,6 +183,7 @@ pnpm lint        # ESLintを実行
 | `NEXT_PUBLIC_SUPABASE_URL` | SupabaseプロジェクトのURL | はい |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabaseの匿名キー | はい |
 | `OPENAI_API_KEY` | OpenAI APIキー | はい（チャットボット用） |
+| `TWAPI_KEY` | twitterapi.io APIキー | はい（Twitter検索用） |
 
 ## 📄 ライセンス
 
