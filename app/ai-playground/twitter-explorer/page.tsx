@@ -47,6 +47,8 @@ export default function TwitterExplorerPage() {
   const [error, setError] = useState<string | null>(null)
   const [query, setQuery] = useState('AI')
   const [fromAccount, setFromAccount] = useState('')
+  const [verifiedOnly, setVerifiedOnly] = useState(false)
+  const [minRetweets, setMinRetweets] = useState('')
   const [limit, setLimit] = useState(50)
   const [sort, setSort] = useState<'recency' | 'relevance'>('recency')
   const [lang, setLang] = useState('ja')
@@ -64,6 +66,8 @@ export default function TwitterExplorerPage() {
       const params = new URLSearchParams({
         query: query.trim(),
         fromAccount: fromAccount.trim(),
+        verifiedOnly: verifiedOnly.toString(),
+        minRetweets: minRetweets.trim(),
         limit: limit.toString(),
         sort,
         lang
@@ -243,6 +247,56 @@ export default function TwitterExplorerPage() {
                     <p className="text-xs text-gray-500">
                       指定したアカウントからのツイートのみを検索します
                     </p>
+                  </div>
+                </div>
+
+                {/* Additional Filters */}
+                <div className="space-y-4 p-4 bg-gray-700/30 rounded-xl border border-gray-600">
+                  <div className="flex items-center gap-2 text-sm font-light text-gray-300">
+                    <Filter className="w-4 h-4 text-green-400" />
+                    追加フィルター <span className="text-xs text-gray-500">(より効果的な絞り込み)</span>
+                  </div>
+                  
+                  <div className="grid md:grid-cols-2 gap-4">
+                    {/* Verified Only Toggle */}
+                    <div className="space-y-2">
+                      <label className="flex items-center gap-3 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={verifiedOnly}
+                          onChange={(e) => setVerifiedOnly(e.target.checked)}
+                          className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500 focus:ring-2"
+                        />
+                        <div className="flex items-center gap-2">
+                          <div className="w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
+                            <div className="w-2 h-2 bg-white rounded-full"></div>
+                          </div>
+                          <span className="text-sm text-gray-300">認証済みアカウントのみ</span>
+                        </div>
+                      </label>
+                      <p className="text-xs text-gray-500 ml-7">
+                        Twitter認証済み（青いチェックマーク）のアカウントのみ
+                      </p>
+                    </div>
+
+                    {/* Min Retweets */}
+                    <div className="space-y-2">
+                      <label className="text-sm font-light text-gray-300">
+                        最小リツイート数
+                      </label>
+                      <input
+                        type="number"
+                        value={minRetweets}
+                        onChange={(e) => setMinRetweets(e.target.value)}
+                        onKeyPress={handleKeyPress}
+                        placeholder="10"
+                        className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder:text-gray-400 focus:border-green-500 focus:ring-1 focus:ring-green-500 outline-none transition-colors text-sm"
+                        min="0"
+                      />
+                      <p className="text-xs text-gray-500">
+                        バズっているツイートに絞り込み
+                      </p>
+                    </div>
                   </div>
                 </div>
 

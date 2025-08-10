@@ -18,6 +18,8 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const query = searchParams.get('query') || 'AI'
     const fromAccount = searchParams.get('fromAccount') || ''
+    const verifiedOnly = searchParams.get('verifiedOnly') === 'true'
+    const minRetweets = searchParams.get('minRetweets') || ''
     const lang = searchParams.get('lang') || 'ja'
     const limit = parseInt(searchParams.get('limit') || '50')
     const sort = searchParams.get('sort') || 'recency'
@@ -38,7 +40,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Twitter APIに送信するクエリを構築
-    function buildQuery(keywords: string, fromAccount: string, lang: string): string {
+    function buildQuery(keywords: string, fromAccount: string, verifiedOnly: boolean, minRetweets: string, lang: string): string {
       let searchQuery = keywords
       
       // アカウント指定がある場合は from:username を追加
@@ -50,13 +52,29 @@ export async function GET(request: NextRequest) {
         }
       }
       
+      // 認証済みアカウントのみフィルター
+      if (verifiedOnly) {
+        searchQuery += ` is:verified`
+      }
+      
+      // 最小リツイート数フィルター
+      if (minRetweets.trim()) {
+        const retweetCount = parseInt(minRetweets.trim())
+        if (!isNaN(retweetCount) && retweetCount > 0) {
+          searchQuery += ` min_retweets:${retweetCount}`
+        }
+      }
+      
       // 言語指定を追加
       searchQuery += ` lang:${lang}`
       
       return searchQuery
     }
     
-    const searchQuery = buildQuery(query, fromAccount, lang)
+    const searchQuery = buildQuery(query, fromAccount, verifiedOnly, minRetweets, lang)
+    
+    // デバッグ用：構築されたクエリをログ出力
+    console.log('Constructed search query:', searchQuery)
     
     // リクエストパラメータを構築
     const params = new URLSearchParams({
@@ -144,12 +162,14 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { query = 'AI', fromAccount = '', lang = 'ja', limit = 50, sort = 'recency' } = body
+    const { query = 'AI', fromAccount = '', verifiedOnly = false, minRetweets = '', lang = 'ja', limit = 50, sort = 'recency' } = body
     
     // クエリパラメータを作成してGETメソッドに委譲
     const url = new URL(request.url)
     url.searchParams.set('query', query)
     url.searchParams.set('fromAccount', fromAccount)
+    url.searchParams.set('verifiedOnly', verifiedOnly.toString())
+    url.searchParams.set('minRetweets', minRetweets)
     url.searchParams.set('lang', lang)
     url.searchParams.set('limit', limit.toString())
     url.searchParams.set('sort', sort)
