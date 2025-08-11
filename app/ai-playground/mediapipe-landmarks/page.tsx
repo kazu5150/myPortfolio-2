@@ -34,6 +34,7 @@ export default function MediaPipeLandmarksPage() {
   })
   const [error, setError] = useState<string | null>(null)
   const [landmarkCount, setLandmarkCount] = useState({ face: 0, hands: 0, faceCount: 0, handCount: 0 })
+  const [handGestures, setHandGestures] = useState<{gesture: number, handedness: string}[]>([])
   
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -45,6 +46,75 @@ export default function MediaPipeLandmarksPage() {
 
   // Store latest hand results for integrated drawing
   const latestHandResults = useRef<any>(null)
+
+  // Hand gesture recognition function
+  const recognizeHandGesture = useCallback((landmarks: any[], handIndex: number, handedness: string) => {
+    if (!landmarks || landmarks.length !== 21) return -1
+
+    // ランドマークのインデックス定義
+    const THUMB_TIP = 4, THUMB_IP = 3, THUMB_MCP = 2
+    const INDEX_TIP = 8, INDEX_PIP = 6, INDEX_MCP = 5
+    const MIDDLE_TIP = 12, MIDDLE_PIP = 10, MIDDLE_MCP = 9
+    const RING_TIP = 16, RING_PIP = 14, RING_MCP = 13
+    const PINKY_TIP = 20, PINKY_PIP = 18, PINKY_MCP = 17
+
+    // 指が立っているかどうかを判定する関数
+    const isFingerUp = (tip: number, pip: number, mcp: number) => {
+      // 親指の判定（左右の手に応じて判定方向を調整）
+      if (tip === THUMB_TIP) {
+        // MediaPipeの手の向きに基づいて親指の判定
+        // 右手: 親指が左側にあるときは立っている
+        // 左手: 親指が右側にあるときは立っている
+        const isRightHand = handedness === 'Right'
+        if (isRightHand) {
+          return landmarks[tip].x < landmarks[pip].x
+        } else {
+          return landmarks[tip].x > landmarks[pip].x
+        }
+      }
+      // その他の指は縦方向の判定（指先がPIPより上にある）
+      return landmarks[tip].y < landmarks[pip].y
+    }
+
+    // 各指の状態を判定
+    const thumbUp = isFingerUp(THUMB_TIP, THUMB_IP, THUMB_MCP)
+    const indexUp = isFingerUp(INDEX_TIP, INDEX_PIP, INDEX_MCP)
+    const middleUp = isFingerUp(MIDDLE_TIP, MIDDLE_PIP, MIDDLE_MCP)
+    const ringUp = isFingerUp(RING_TIP, RING_PIP, RING_MCP)
+    const pinkyUp = isFingerUp(PINKY_TIP, PINKY_PIP, PINKY_MCP)
+
+    // 立っている指の数を数える
+    let fingersUp = 0
+    if (thumbUp) fingersUp++
+    if (indexUp) fingersUp++
+    if (middleUp) fingersUp++
+    if (ringUp) fingersUp++
+    if (pinkyUp) fingersUp++
+
+    console.log(`${handedness} Hand fingers:`, { thumbUp, indexUp, middleUp, ringUp, pinkyUp, fingersUp }) // デバッグ用
+
+    // 特定のジェスチャーを判定
+    // グー（すべて閉じている）
+    if (fingersUp === 0) return 0
+
+    // 人差し指のみ（1）
+    if (fingersUp === 1 && indexUp) return 1
+
+    // チョキ（人差し指と中指）
+    if (fingersUp === 2 && indexUp && middleUp && !thumbUp) return 2
+
+    // 3本指（親指、人差し指、中指）
+    if (fingersUp === 3 && thumbUp && indexUp && middleUp) return 3
+
+    // 4本指
+    if (fingersUp === 4) return 4
+
+    // パー（すべて開いている）
+    if (fingersUp === 5) return 5
+
+    // その他の場合は立っている指の数を返す
+    return fingersUp
+  }, [])
 
   // Draw hand landmarks function
   const drawHandLandmarks = useCallback((canvasCtx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) => {
@@ -152,30 +222,49 @@ export default function MediaPipeLandmarksPage() {
   }, [detectionState.face, detectionState.hands, drawHandLandmarks])
 
   const onHandsResults = useCallback((results: any) => {
+    console.log('onHandsResults called, face enabled:', detectionState.face, 'hands enabled:', detectionState.hands)
     latestHandResults.current = results
     
-    // Update hand count
+    // Update hand count and recognize gestures
     if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+      console.log('Hand landmarks detected:', results.multiHandLandmarks.length)
       setLandmarkCount(prev => ({ 
         ...prev, 
         hands: results.multiHandLandmarks.length * 21,
         handCount: results.multiHandLandmarks.length
       }))
+      
+      // 各手のジェスチャーを認識（手の左右情報も含める）
+      const gestures = results.multiHandLandmarks.map((landmarks: any, index: number) => {
+        // MediaPipeの結果を鏡像表示に合わせて左右反転
+        const originalHandedness = results.multiHandedness?.[index]?.label || 'Unknown'
+        const handedness = originalHandedness === 'Right' ? 'Left' : originalHandedness === 'Left' ? 'Right' : 'Unknown'
+        const gesture = recognizeHandGesture(landmarks, index, originalHandedness) // 認識には元の値を使用
+        console.log(`Hand ${index}: Original ${originalHandedness} -> Display ${handedness}, Gesture: ${gesture}`) // デバッグ用
+        return { gesture, handedness }
+      })
+      console.log('Setting hand gestures:', gestures) // デバッグ用
+      setHandGestures(gestures)
     } else {
+      console.log('No hand landmarks detected')
       setLandmarkCount(prev => ({ ...prev, hands: 0, handCount: 0 }))
+      setHandGestures([])
     }
 
-    // If only hands detection is enabled (face disabled), draw directly on canvas
-    if (!detectionState.face && detectionState.hands && canvasRef.current) {
+    // ALWAYS draw when hands detection is enabled, regardless of face detection
+    if (detectionState.hands && canvasRef.current && results.image) {
+      console.log('Drawing hands results to canvas')
       const canvas = canvasRef.current
       const canvasCtx = canvas.getContext('2d')
-      if (canvasCtx && results.image) {
+      
+      if (canvasCtx) {
         // Clear canvas and draw video image
         canvasCtx.clearRect(0, 0, canvas.width, canvas.height)
         canvasCtx.drawImage(results.image, 0, 0, canvas.width, canvas.height)
         
-        // Draw hand landmarks directly with the current results
-        if (detectionState.hands && results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+        // Draw hand landmarks if available
+        if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+          console.log('Actually drawing hand landmarks:', results.multiHandLandmarks.length)
           const handColors = ['#FF0000', '#FF8800', '#8800FF', '#FF0088'] // 赤、オレンジ、紫、ピンク
           const handConnectionColors = ['#00FF00', '#00FF88', '#8800FF', '#FF0088'] // 接続線の色
           
@@ -217,7 +306,7 @@ export default function MediaPipeLandmarksPage() {
         }
       }
     }
-  }, [detectionState.face, detectionState.hands])
+  }, [detectionState.face, detectionState.hands, recognizeHandGesture])
 
   // Load MediaPipe scripts from CDN
   useEffect(() => {
@@ -324,9 +413,10 @@ export default function MediaPipeLandmarksPage() {
             // 複数の手を検出する設定
             hands.setOptions({
               maxNumHands: 4, // 最大4つの手を検出（複数人対応）
-              modelComplexity: 0, // 軽量モデルで安定性重視
-              minDetectionConfidence: 0.5,
-              minTrackingConfidence: 0.5
+              modelComplexity: 1, // より精度の高いモデルを使用
+              minDetectionConfidence: 0.3, // 検出の閾値を下げる
+              minTrackingConfidence: 0.3, // トラッキングの閾値を下げる
+              staticImageMode: false
             })
 
             hands.onResults((results: any) => {
@@ -377,11 +467,13 @@ export default function MediaPipeLandmarksPage() {
       
       // Process hands detection ONLY if enabled
       if (handsRef.current && detectionState.hands) {
+        console.log('Sending frame to Hands detector')
         await handsRef.current.send({ image: videoRef.current })
       } else if (!detectionState.hands) {
         // Clear hand landmarks when hand detection is disabled
         latestHandResults.current = null
         setLandmarkCount(prev => ({ ...prev, hands: 0, handCount: 0 }))
+        setHandGestures([])
       }
 
       // If both detections are disabled, just show plain video
@@ -641,8 +733,8 @@ export default function MediaPipeLandmarksPage() {
           )}
 
           {/* Camera Feed and Status */}
-          <div className="grid lg:grid-cols-4 gap-6">
-            {/* Camera Feed - Larger size */}
+          <div className="grid lg:grid-cols-5 gap-6">
+            {/* Camera Feed - Slightly smaller */}
             <div className="lg:col-span-3">
               <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-4 border border-gray-700">
                 <div className="relative bg-gray-900 rounded-xl overflow-hidden aspect-video">
@@ -678,7 +770,7 @@ export default function MediaPipeLandmarksPage() {
             </div>
 
             {/* Compact Status Panel */}
-            <div className="space-y-4">
+            <div className="lg:col-span-2 space-y-4">
               {/* Detection Status */}
               <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 border border-gray-700">
                 <h3 className="text-sm font-medium text-white mb-3 flex items-center gap-1">
@@ -766,6 +858,41 @@ export default function MediaPipeLandmarksPage() {
                   </div>
                 </div>
               )}
+
+              {/* Hand Gesture Recognition */}
+              {detectionState.isRunning && detectionState.hands && handGestures.length > 0 && (
+                <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 border border-gray-700">
+                  <h3 className="text-sm font-medium text-white mb-3 flex items-center gap-1">
+                    <span className="text-orange-400">✋</span>
+                    ジェスチャー
+                  </h3>
+                  
+                  <div className="space-y-2">
+                    {handGestures.map((handData, index) => (
+                      <div key={index} className="bg-orange-500/10 rounded p-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs text-orange-300">
+                            {handData.handedness === 'Right' ? '右手' : handData.handedness === 'Left' ? '左手' : `手 ${index + 1}`}
+                          </span>
+                          <span className="text-xs text-orange-400">
+                            {handData.gesture === 0 && 'グー'}
+                            {handData.gesture === 1 && '人差し指'}
+                            {handData.gesture === 2 && 'チョキ'}
+                            {handData.gesture === 3 && '3本指'}
+                            {handData.gesture === 4 && '4本指'}
+                            {handData.gesture === 5 && 'パー'}
+                            {handData.gesture > 5 && `${handData.gesture}本指`}
+                            {handData.gesture === -1 && '認識中...'}
+                          </span>
+                        </div>
+                        <div className="text-2xl font-bold text-orange-400 text-center">
+                          {handData.gesture >= 0 ? handData.gesture : '?'}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -790,7 +917,7 @@ export default function MediaPipeLandmarksPage() {
                 </div>
                 <h3 className="text-lg font-light text-white mb-2">手の検出</h3>
                 <p className="text-gray-400 text-sm">
-                  最大2つの手を検出し、21点のランドマークと接続線を表示
+                  最大4つの手を検出し、21点のランドマークとジェスチャー（0-5の数値）を表示
                 </p>
               </div>
             </div>
