@@ -625,26 +625,6 @@ export default function MediaPipeLandmarksPage() {
                 </div>
               </div>
 
-              {/* Landmark Count Display */}
-              {detectionState.isRunning && (
-                <div className="flex items-center justify-center gap-6 mt-6 pt-4 border-t border-gray-700">
-                  <div className="text-center">
-                    <div className="text-2xl font-light text-blue-400">{landmarkCount.face}</div>
-                    <div className="text-xs text-gray-400">顔ランドマーク</div>
-                    <div className="text-xs text-gray-500">({landmarkCount.faceCount}個の顔)</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-light text-green-400">{landmarkCount.hands}</div>
-                    <div className="text-xs text-gray-400">手ランドマーク</div>
-                    <div className="text-xs text-gray-500">({landmarkCount.handCount}個の手)</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-light text-purple-400">{landmarkCount.face + landmarkCount.hands}</div>
-                    <div className="text-xs text-gray-400">合計</div>
-                    <div className="text-xs text-gray-500">({landmarkCount.faceCount + landmarkCount.handCount}個)</div>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
 
@@ -660,38 +640,132 @@ export default function MediaPipeLandmarksPage() {
             </div>
           )}
 
-          {/* Camera Feed */}
-          <div className="relative">
-            <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-6 border border-gray-700">
-              <div className="relative aspect-video bg-gray-900 rounded-xl overflow-hidden">
-                <video
-                  ref={videoRef}
-                  className="absolute inset-0 w-full h-full object-cover"
-                  autoPlay
-                  playsInline
-                  muted
-                  style={{ transform: 'scaleX(-1)' }}
-                />
-                <canvas
-                  ref={canvasRef}
-                  width={1280}
-                  height={720}
-                  className="absolute inset-0 w-full h-full object-cover"
-                  style={{ transform: 'scaleX(-1)' }}
-                />
+          {/* Camera Feed and Status */}
+          <div className="grid lg:grid-cols-4 gap-6">
+            {/* Camera Feed - Larger size */}
+            <div className="lg:col-span-3">
+              <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-4 border border-gray-700">
+                <div className="relative bg-gray-900 rounded-xl overflow-hidden aspect-video">
+                  <video
+                    ref={videoRef}
+                    className="absolute inset-0 w-full h-full object-cover"
+                    autoPlay
+                    playsInline
+                    muted
+                    style={{ transform: 'scaleX(-1)' }}
+                  />
+                  <canvas
+                    ref={canvasRef}
+                    width={1280}
+                    height={720}
+                    className="absolute inset-0 w-full h-full object-cover"
+                    style={{ transform: 'scaleX(-1)' }}
+                  />
+                  
+                  {!detectionState.isRunning && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-gray-900/80">
+                      <div className="text-center">
+                        <Camera className="w-16 h-16 mx-auto mb-4 text-gray-400" />
+                        <h3 className="text-xl font-thin text-white mb-2">カメラを開始してください</h3>
+                        <p className="text-gray-400">
+                          「開始」ボタンをクリックしてランドマーク検出を始めましょう
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Compact Status Panel */}
+            <div className="space-y-4">
+              {/* Detection Status */}
+              <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 border border-gray-700">
+                <h3 className="text-sm font-medium text-white mb-3 flex items-center gap-1">
+                  <Settings className="w-4 h-4 text-green-400" />
+                  検出状態
+                </h3>
                 
-                {!detectionState.isRunning && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-gray-900/80">
-                    <div className="text-center">
-                      <Camera className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-                      <h3 className="text-xl font-thin text-white mb-2">カメラを開始してください</h3>
-                      <p className="text-gray-400">
-                        「開始」ボタンをクリックしてランドマーク検出を始めましょう
-                      </p>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-300">カメラ</span>
+                    <div className="flex items-center gap-1">
+                      <div className={`w-1.5 h-1.5 rounded-full ${
+                        detectionState.isRunning ? 'bg-green-400 animate-pulse' : 'bg-gray-500'
+                      }`}></div>
+                      <span className={`text-xs ${
+                        detectionState.isRunning ? 'text-green-400' : 'text-gray-400'
+                      }`}>
+                        {detectionState.isRunning ? '稼働中' : '停止中'}
+                      </span>
                     </div>
                   </div>
-                )}
+                  
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-300">顔検出</span>
+                    <div className="flex items-center gap-1">
+                      <div className={`w-1.5 h-1.5 rounded-full ${
+                        detectionState.face ? 'bg-blue-400' : 'bg-gray-500'
+                      }`}></div>
+                      <span className={`text-xs ${
+                        detectionState.face ? 'text-blue-400' : 'text-gray-400'
+                      }`}>
+                        {detectionState.face ? 'ON' : 'OFF'}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-300">手検出</span>
+                    <div className="flex items-center gap-1">
+                      <div className={`w-1.5 h-1.5 rounded-full ${
+                        detectionState.hands ? 'bg-green-400' : 'bg-gray-500'
+                      }`}></div>
+                      <span className={`text-xs ${
+                        detectionState.hands ? 'text-green-400' : 'text-gray-400'
+                      }`}>
+                        {detectionState.hands ? 'ON' : 'OFF'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
               </div>
+
+              {/* Compact Landmark Statistics */}
+              {detectionState.isRunning && (
+                <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 border border-gray-700">
+                  <h3 className="text-sm font-medium text-white mb-3 flex items-center gap-1">
+                    <Eye className="w-4 h-4 text-purple-400" />
+                    統計
+                  </h3>
+                  
+                  <div className="space-y-2">
+                    <div className="bg-blue-500/10 rounded p-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-blue-300">顔</span>
+                        <span className="text-xs text-blue-400">{landmarkCount.faceCount}個</span>
+                      </div>
+                      <div className="text-lg font-light text-blue-400">{landmarkCount.face}</div>
+                    </div>
+                    
+                    <div className="bg-green-500/10 rounded p-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-green-300">手</span>
+                        <span className="text-xs text-green-400">{landmarkCount.handCount}個</span>
+                      </div>
+                      <div className="text-lg font-light text-green-400">{landmarkCount.hands}</div>
+                    </div>
+                    
+                    <div className="bg-purple-500/10 rounded p-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-purple-300">合計</span>
+                        <span className="text-xs text-purple-400">{landmarkCount.faceCount + landmarkCount.handCount}個</span>
+                      </div>
+                      <div className="text-lg font-light text-purple-400">{landmarkCount.face + landmarkCount.hands}</div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
