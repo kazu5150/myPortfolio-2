@@ -43,78 +43,17 @@ export default function MediaPipeLandmarksPage() {
   const animationRef = useRef<number | null>(null)
   const [mediaPipeLoaded, setMediaPipeLoaded] = useState(false)
 
-  const onFaceResults = useCallback((results: any) => {
-    console.log('Face results:', results) // デバッグ用
-    
-    if (!canvasRef.current) return
+  // Store latest hand results for integrated drawing
+  const latestHandResults = useRef<any>(null)
 
-    const canvas = canvasRef.current
-    const canvasCtx = canvas.getContext('2d')
-    if (!canvasCtx) return
-
-    // キャンバスをクリアして画像を描画
-    canvasCtx.clearRect(0, 0, canvas.width, canvas.height)
-    if (results.image) {
-      canvasCtx.drawImage(results.image, 0, 0, canvas.width, canvas.height)
+  // Draw hand landmarks function
+  const drawHandLandmarks = useCallback((canvasCtx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) => {
+    if (!detectionState.hands || !latestHandResults.current?.multiHandLandmarks) {
+      return
     }
 
-    // 顔のランドマーク処理
-    if (detectionState.face && results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
-      console.log('Drawing face landmarks:', results.multiFaceLandmarks.length) // デバッグ用
-      setLandmarkCount(prev => ({ 
-        ...prev, 
-        face: results.multiFaceLandmarks.length * 468,
-        faceCount: results.multiFaceLandmarks.length
-      }))
-      
-      const faceColors = ['#00FF00', '#00FFFF', '#FF00FF', '#FFFF00'] // 緑、シアン、マゼンタ、黄
-      
-      results.multiFaceLandmarks.forEach((landmarks: any, faceIndex: number) => {
-        // 顔ごとに異なる色を使用
-        const color = faceColors[faceIndex % faceColors.length]
-        canvasCtx.fillStyle = color
-        canvasCtx.strokeStyle = '#FFFFFF'
-        canvasCtx.lineWidth = 1
-        
-        for (let i = 0; i < landmarks.length; i++) {
-          const x = landmarks[i].x * canvas.width
-          const y = landmarks[i].y * canvas.height
-          
-          // メインのドット（顔ごとの色、小さめ）
-          canvasCtx.beginPath()
-          canvasCtx.arc(x, y, 1.5, 0, 2 * Math.PI)
-          canvasCtx.fill()
-          
-          // 縁取り（白色）で見やすくする
-          canvasCtx.beginPath()
-          canvasCtx.arc(x, y, 1.5, 0, 2 * Math.PI)
-          canvasCtx.stroke()
-        }
-      })
-    } else {
-      setLandmarkCount(prev => ({ ...prev, face: 0, faceCount: 0 }))
-    }
-
-    // 手の検出は独立して処理しない（processFrameで処理）
-  }, [detectionState.face, detectionState.hands])
-
-  const onHandsResults = useCallback((results: any) => {
-    console.log('Hands results:', results) // デバッグ用
-    
-    if (!canvasRef.current) return
-
-    const canvas = canvasRef.current
-    const canvasCtx = canvas.getContext('2d')
-    if (!canvasCtx) return
-
+    const results = latestHandResults.current
     if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
-      console.log('Drawing hand landmarks:', results.multiHandLandmarks.length) // デバッグ用
-      setLandmarkCount(prev => ({ 
-        ...prev, 
-        hands: results.multiHandLandmarks.length * 21,
-        handCount: results.multiHandLandmarks.length
-      }))
-      
       const handColors = ['#FF0000', '#FF8800', '#8800FF', '#FF0088'] // 赤、オレンジ、紫、ピンク
       const handConnectionColors = ['#00FF00', '#00FF88', '#8800FF', '#FF0088'] // 接続線の色
       
@@ -153,10 +92,132 @@ export default function MediaPipeLandmarksPage() {
           })
         }
       })
+    }
+  }, [detectionState.hands])
+
+  const onFaceResults = useCallback((results: any) => {
+    
+    if (!canvasRef.current) return
+
+    const canvas = canvasRef.current
+    const canvasCtx = canvas.getContext('2d')
+    if (!canvasCtx) return
+
+    // キャンバスを完全にクリアして画像を描画
+    canvasCtx.clearRect(0, 0, canvas.width, canvas.height)
+    if (results.image) {
+      canvasCtx.drawImage(results.image, 0, 0, canvas.width, canvas.height)
+    }
+
+    // 顔のランドマーク処理（顔検出が有効な場合のみ）
+    if (detectionState.face && results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
+      setLandmarkCount(prev => ({ 
+        ...prev, 
+        face: results.multiFaceLandmarks.length * 468,
+        faceCount: results.multiFaceLandmarks.length
+      }))
+      
+      const faceColors = ['#00FF00', '#00FFFF', '#FF00FF', '#FFFF00'] // 緑、シアン、マゼンタ、黄
+      
+      results.multiFaceLandmarks.forEach((landmarks: any, faceIndex: number) => {
+        // 顔ごとに異なる色を使用
+        const color = faceColors[faceIndex % faceColors.length]
+        canvasCtx.fillStyle = color
+        canvasCtx.strokeStyle = '#FFFFFF'
+        canvasCtx.lineWidth = 1
+        
+        for (let i = 0; i < landmarks.length; i++) {
+          const x = landmarks[i].x * canvas.width
+          const y = landmarks[i].y * canvas.height
+          
+          // メインのドット（顔ごとの色、小さめ）
+          canvasCtx.beginPath()
+          canvasCtx.arc(x, y, 1.5, 0, 2 * Math.PI)
+          canvasCtx.fill()
+          
+          // 縁取り（白色）で見やすくする
+          canvasCtx.beginPath()
+          canvasCtx.arc(x, y, 1.5, 0, 2 * Math.PI)
+          canvasCtx.stroke()
+        }
+      })
+    } else if (!detectionState.face) {
+      // 顔検出が無効の場合はカウントをクリア
+      setLandmarkCount(prev => ({ ...prev, face: 0, faceCount: 0 }))
+    }
+
+    // 手のランドマークも同じCanvasに描画（手検出が有効な場合のみ）
+    drawHandLandmarks(canvasCtx, canvas)
+
+  }, [detectionState.face, detectionState.hands, drawHandLandmarks])
+
+  const onHandsResults = useCallback((results: any) => {
+    latestHandResults.current = results
+    
+    // Update hand count
+    if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+      setLandmarkCount(prev => ({ 
+        ...prev, 
+        hands: results.multiHandLandmarks.length * 21,
+        handCount: results.multiHandLandmarks.length
+      }))
     } else {
       setLandmarkCount(prev => ({ ...prev, hands: 0, handCount: 0 }))
     }
-  }, [detectionState.hands])
+
+    // If only hands detection is enabled (face disabled), draw directly on canvas
+    if (!detectionState.face && detectionState.hands && canvasRef.current) {
+      const canvas = canvasRef.current
+      const canvasCtx = canvas.getContext('2d')
+      if (canvasCtx && results.image) {
+        // Clear canvas and draw video image
+        canvasCtx.clearRect(0, 0, canvas.width, canvas.height)
+        canvasCtx.drawImage(results.image, 0, 0, canvas.width, canvas.height)
+        
+        // Draw hand landmarks directly with the current results
+        if (detectionState.hands && results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+          const handColors = ['#FF0000', '#FF8800', '#8800FF', '#FF0088'] // 赤、オレンジ、紫、ピンク
+          const handConnectionColors = ['#00FF00', '#00FF88', '#8800FF', '#FF0088'] // 接続線の色
+          
+          results.multiHandLandmarks.forEach((landmarks: any, handIndex: number) => {
+            // 手ごとに異なる色を使用
+            const dotColor = handColors[handIndex % handColors.length]
+            const lineColor = handConnectionColors[handIndex % handConnectionColors.length]
+            
+            // ドット描画
+            canvasCtx.fillStyle = dotColor
+            canvasCtx.strokeStyle = '#FFFFFF'
+            canvasCtx.lineWidth = 2
+            
+            for (let i = 0; i < landmarks.length; i++) {
+              const x = landmarks[i].x * canvas.width
+              const y = landmarks[i].y * canvas.height
+              
+              // メインのドット（手ごとの色、少し大きめ）
+              canvasCtx.beginPath()
+              canvasCtx.arc(x, y, 5, 0, 2 * Math.PI)
+              canvasCtx.fill()
+              
+              // 縁取り（白色）で見やすくする
+              canvasCtx.beginPath()
+              canvasCtx.arc(x, y, 5, 0, 2 * Math.PI)
+              canvasCtx.stroke()
+            }
+            
+            // 手の接続線も手ごとに異なる色で描画
+            if (window.drawConnectors && window.HAND_CONNECTIONS) {
+              canvasCtx.strokeStyle = lineColor
+              canvasCtx.lineWidth = 2
+              window.drawConnectors(canvasCtx, landmarks, window.HAND_CONNECTIONS, {
+                color: lineColor,
+                lineWidth: 2
+              })
+            }
+          })
+        }
+      }
+    }
+  }, [detectionState.face, detectionState.hands])
 
   // Load MediaPipe scripts from CDN
   useEffect(() => {
@@ -306,18 +367,31 @@ export default function MediaPipeLandmarksPage() {
     if (!videoRef.current || !detectionState.isRunning) return
 
     try {
-      console.log('Processing frame - face:', detectionState.face, 'hands:', detectionState.hands)
-      
-      // Process face detection
+      // Process face detection ONLY if enabled
       if (faceMeshRef.current && detectionState.face) {
-        console.log('Sending frame to FaceMesh')
         await faceMeshRef.current.send({ image: videoRef.current })
+      } else if (!detectionState.face) {
+        // Clear face landmarks when face detection is disabled
+        setLandmarkCount(prev => ({ ...prev, face: 0, faceCount: 0 }))
       }
       
-      // Process hands detection independently
+      // Process hands detection ONLY if enabled
       if (handsRef.current && detectionState.hands) {
-        console.log('Sending frame to Hands')
         await handsRef.current.send({ image: videoRef.current })
+      } else if (!detectionState.hands) {
+        // Clear hand landmarks when hand detection is disabled
+        latestHandResults.current = null
+        setLandmarkCount(prev => ({ ...prev, hands: 0, handCount: 0 }))
+      }
+
+      // If both detections are disabled, just show plain video
+      if (!detectionState.face && !detectionState.hands && canvasRef.current) {
+        const canvas = canvasRef.current
+        const canvasCtx = canvas.getContext('2d')
+        if (canvasCtx) {
+          canvasCtx.clearRect(0, 0, canvas.width, canvas.height)
+          canvasCtx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height)
+        }
       }
     } catch (err) {
       console.error('Frame processing error:', err)
