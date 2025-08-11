@@ -91,7 +91,6 @@ export default function MediaPipeLandmarksPage() {
     if (ringUp) fingersUp++
     if (pinkyUp) fingersUp++
 
-    console.log(`${handedness} Hand fingers:`, { thumbUp, indexUp, middleUp, ringUp, pinkyUp, fingersUp }) // デバッグ用
 
     // 特定のジェスチャーを判定
     // グー（すべて閉じている）
@@ -222,12 +221,10 @@ export default function MediaPipeLandmarksPage() {
   }, [detectionState.face, detectionState.hands, drawHandLandmarks])
 
   const onHandsResults = useCallback((results: any) => {
-    console.log('onHandsResults called, face enabled:', detectionState.face, 'hands enabled:', detectionState.hands)
     latestHandResults.current = results
     
     // Update hand count and recognize gestures
     if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
-      console.log('Hand landmarks detected:', results.multiHandLandmarks.length)
       setLandmarkCount(prev => ({ 
         ...prev, 
         hands: results.multiHandLandmarks.length * 21,
@@ -240,20 +237,16 @@ export default function MediaPipeLandmarksPage() {
         const originalHandedness = results.multiHandedness?.[index]?.label || 'Unknown'
         const handedness = originalHandedness === 'Right' ? 'Left' : originalHandedness === 'Left' ? 'Right' : 'Unknown'
         const gesture = recognizeHandGesture(landmarks, index, originalHandedness) // 認識には元の値を使用
-        console.log(`Hand ${index}: Original ${originalHandedness} -> Display ${handedness}, Gesture: ${gesture}`) // デバッグ用
         return { gesture, handedness }
       })
-      console.log('Setting hand gestures:', gestures) // デバッグ用
       setHandGestures(gestures)
     } else {
-      console.log('No hand landmarks detected')
       setLandmarkCount(prev => ({ ...prev, hands: 0, handCount: 0 }))
       setHandGestures([])
     }
 
-    // ALWAYS draw when hands detection is enabled, regardless of face detection
-    if (detectionState.hands && canvasRef.current && results.image) {
-      console.log('Drawing hands results to canvas')
+    // Only draw hands directly when face detection is disabled (hands-only mode)
+    if (!detectionState.face && detectionState.hands && canvasRef.current && results.image) {
       const canvas = canvasRef.current
       const canvasCtx = canvas.getContext('2d')
       
@@ -264,7 +257,6 @@ export default function MediaPipeLandmarksPage() {
         
         // Draw hand landmarks if available
         if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
-          console.log('Actually drawing hand landmarks:', results.multiHandLandmarks.length)
           const handColors = ['#FF0000', '#FF8800', '#8800FF', '#FF0088'] // 赤、オレンジ、紫、ピンク
           const handConnectionColors = ['#00FF00', '#00FF88', '#8800FF', '#FF0088'] // 接続線の色
           
@@ -467,7 +459,6 @@ export default function MediaPipeLandmarksPage() {
       
       // Process hands detection ONLY if enabled
       if (handsRef.current && detectionState.hands) {
-        console.log('Sending frame to Hands detector')
         await handsRef.current.send({ image: videoRef.current })
       } else if (!detectionState.hands) {
         // Clear hand landmarks when hand detection is disabled
