@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const response = await fetch('https://n8n.srv927568.hstgr.cloud/webhook-test/rag-starwars', {
+    const response = await fetch('https://n8n.srv927568.hstgr.cloud/webhook/rag-starwars', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
