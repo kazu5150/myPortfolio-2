@@ -66,9 +66,19 @@ export function N8NChatbot() {
         throw new Error(data.error || 'エラーが発生しました')
       }
 
+      // n8nからの応答を適切に処理
+      let responseText = ''
+      if (data.response && typeof data.response === 'object' && data.response.output) {
+        responseText = data.response.output
+      } else if (typeof data.response === 'string') {
+        responseText = data.response
+      } else {
+        responseText = JSON.stringify(data.response)
+      }
+
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: typeof data.response === 'string' ? data.response : JSON.stringify(data.response),
+        text: responseText,
         isUser: false,
         timestamp: new Date()
       }
