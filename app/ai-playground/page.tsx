@@ -37,6 +37,15 @@ export default function AIPlaygroundPage() {
       href: '/ai-playground/mediapipe-landmarks',
     },
     {
+      id: 9,
+      title: 'スター・ウォーズ AI チャット',
+      description: 'n8nワークフローを使用したスター・ウォーズ専門AI',
+      icon: <Bot className="w-6 h-6" />,
+      status: 'available',
+      gradient: 'from-yellow-500 to-orange-500',
+      href: '/ai-playground/n8n-starwars',
+    },
+    {
       id: 4,
       title: 'テキスト生成AI',
       description: 'GPTモデルを使用した創造的なテキスト生成',
