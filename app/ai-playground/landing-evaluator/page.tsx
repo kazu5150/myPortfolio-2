@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Search, Loader2, BarChart3, CheckCircle, XCircle, AlertCircle } from 'lucide-react'
 
 interface EvaluationResult {
@@ -12,6 +12,27 @@ export default function LandingEvaluatorPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [result, setResult] = useState<EvaluationResult | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [currentStep, setCurrentStep] = useState(0)
+
+  // 処理ステップの定義
+  const processingSteps = [
+    'ページ構造を解析中',
+    'ユーザー体験を評価中', 
+    '改善案を生成中',
+    '辛口レポートを作成中'
+  ]
+
+  // ローディング中のステップアニメーション
+  useEffect(() => {
+    let interval: NodeJS.Timeout
+    if (isLoading) {
+      setCurrentStep(0)
+      interval = setInterval(() => {
+        setCurrentStep((prev) => (prev + 1) % processingSteps.length)
+      }, 8000) // 8秒ごとにステップが進む
+    }
+    return () => clearInterval(interval)
+  }, [isLoading, processingSteps.length])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -20,6 +41,7 @@ export default function LandingEvaluatorPage() {
     setIsLoading(true)
     setError(null)
     setResult(null)
+    setCurrentStep(0)
 
     try {
       const response = await fetch('/api/evaluate-landing', {
@@ -40,6 +62,7 @@ export default function LandingEvaluatorPage() {
       setError(err instanceof Error ? err.message : '評価中にエラーが発生しました')
     } finally {
       setIsLoading(false)
+      setCurrentStep(0)
     }
   }
 
@@ -151,6 +174,75 @@ export default function LandingEvaluatorPage() {
           {error && (
             <div className="max-w-2xl mx-auto mb-8 p-4 bg-red-500/10 border border-red-500/20 rounded-xl">
               <p className="text-red-400">{error}</p>
+            </div>
+          )}
+
+          {/* AI Processing Animation */}
+          {isLoading && (
+            <div className="max-w-2xl mx-auto mb-8">
+              <div className="bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border border-blue-500/20 rounded-2xl p-8">
+                <div className="text-center">
+                  {/* Main AI Brain Animation */}
+                  <div className="relative mx-auto w-24 h-24 mb-6">
+                    <div className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-400 to-cyan-400 animate-pulse"></div>
+                    <div className="absolute inset-2 rounded-full bg-black flex items-center justify-center">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-400 to-cyan-400 animate-ping"></div>
+                    </div>
+                    {/* Neural network lines */}
+                    <div className="absolute -top-4 -left-4 w-2 h-2 rounded-full bg-blue-400 animate-bounce delay-100"></div>
+                    <div className="absolute -top-4 -right-4 w-2 h-2 rounded-full bg-cyan-400 animate-bounce delay-200"></div>
+                    <div className="absolute -bottom-4 -left-4 w-2 h-2 rounded-full bg-cyan-400 animate-bounce delay-300"></div>
+                    <div className="absolute -bottom-4 -right-4 w-2 h-2 rounded-full bg-blue-400 animate-bounce delay-500"></div>
+                  </div>
+
+                  {/* Progress Text */}
+                  <h3 className="text-xl font-light text-white mb-4">AIが分析中...</h3>
+                  
+                  {/* Processing Steps */}
+                  <div className="space-y-3 text-sm">
+                    {processingSteps.map((step, index) => (
+                      <div 
+                        key={index}
+                        className={`flex items-center justify-center gap-3 transition-all duration-500 ${
+                          index === currentStep 
+                            ? 'text-cyan-300 scale-105' 
+                            : index < currentStep 
+                              ? 'text-green-400' 
+                              : 'text-gray-500'
+                        }`}
+                      >
+                        <div className={`w-2 h-2 rounded-full transition-all duration-500 ${
+                          index === currentStep 
+                            ? 'bg-cyan-400 animate-pulse scale-125' 
+                            : index < currentStep 
+                              ? 'bg-green-400' 
+                              : 'bg-gray-600'
+                        }`}></div>
+                        <span className="relative">
+                          {step}
+                          {index === currentStep && (
+                            <span className="absolute -right-4 text-cyan-400 animate-ping">●</span>
+                          )}
+                          {index < currentStep && (
+                            <CheckCircle className="w-3 h-3 text-green-400 inline ml-1" />
+                          )}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Time indicator */}
+                  <div className="mt-6 text-xs text-gray-400">
+                    <p>通常1-2分程度で完了します</p>
+                  </div>
+
+                  {/* Animated background dots */}
+                  <div className="absolute inset-0 overflow-hidden rounded-2xl -z-10">
+                    <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-blue-500/5 rounded-full blur-xl animate-pulse"></div>
+                    <div className="absolute bottom-1/4 right-1/4 w-48 h-48 bg-cyan-500/5 rounded-full blur-xl animate-pulse delay-1000"></div>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
         </div>
