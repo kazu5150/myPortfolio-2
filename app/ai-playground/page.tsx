@@ -1,4 +1,4 @@
-import { Sparkles, Brain, Wand2, Cpu, Zap, Bot, Image, Twitter, Eye } from 'lucide-react'
+import { Sparkles, Brain, Wand2, Cpu, Zap, Bot, Image, Twitter, Eye, BarChart3 } from 'lucide-react'
 import { Metadata } from 'next'
 import Link from 'next/link'
 
@@ -44,6 +44,15 @@ export default function AIPlaygroundPage() {
       status: 'available',
       gradient: 'from-yellow-500 to-orange-500',
       href: '/ai-playground/n8n-starwars',
+    },
+    {
+      id: 10,
+      title: 'ランディングページ評価',
+      description: 'AIがランディングページを分析し改善案を提案',
+      icon: <BarChart3 className="w-6 h-6" />,
+      status: 'available',
+      gradient: 'from-blue-500 to-cyan-500',
+      href: '/ai-playground/landing-evaluator',
     },
     {
       id: 4,
